@@ -15,23 +15,13 @@
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
 **8種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
 
-| モード | 機能 |
-|--------|------|
-| `--pack` | フォルダをRARCアーカイブ (`.arc`) にパック |
-| `--szs` | フォルダをYaz0圧縮アーカイブ (`.szs`) にパック |
-| `--extract` | `.arc` / `.szs` アーカイブをフォルダに展開 |
-| `--bmd2dae` | `.bmd` / `.bdl` をCollada形式 `.dae` に変換 (BMD_analysis使用) |
-| `--bmd2fbx` | `.bmd` / `.bdl` を `.fbx` に変換 (FBX_analysis使用) |
-| `--bmd2obj` | `.bmd` / `.bdl` を `.obj` + `.mtl` に変換 (BMD_analysis使用) |
-| `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) |
-| `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 |
-
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
-
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
 It supports **8 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+
+Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
 |------|-------------|
@@ -44,7 +34,7 @@ It supports **8 conversion modes** and accepts files via **drag & drop**, **comm
 | `--dae2bmd` | Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
 | `--obj2grid` | Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin` |
 
-Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
+
 
 ## Setup
 
