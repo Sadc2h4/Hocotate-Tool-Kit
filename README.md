@@ -15,43 +15,45 @@ Created by : C2H4
 
 ## Download
 
-*(Release package coming soon)*
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.12a">
+  <img
+    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
+    alt="Download .zip"
+    height="48"
+  />
+</a>
+<br>
+<a href="https://uu.getuploader.com/freehack/download/200">
+  <img
+    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_3.png"
+    alt="Download .zip"
+    height="48"
+  />
+</a>
+<br>
 
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
 **8種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
-
-| モード | 機能 |
-|--------|------|
-| `--pack` | フォルダをRARCアーカイブ (`.arc`) にパック |
-| `--szs` | フォルダをYaz0圧縮アーカイブ (`.szs`) にパック |
-| `--extract` | `.arc` / `.szs` アーカイブをフォルダに展開 |
-| `--bmd2dae` | `.bmd` / `.bdl` をCollada形式 `.dae` に変換 (BMD_analysis使用) |
-| `--bmd2fbx` | `.bmd` / `.bdl` を `.fbx` に変換 (FBX_analysis使用) |
-| `--bmd2obj` | `.bmd` / `.bdl` を `.obj` + `.mtl` に変換 (BMD_analysis使用) |
-| `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) |
-| `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 |
-
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
 
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
 It supports **8 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
-|------|-------------|
-| `--pack` | Pack a folder into a RARC `.arc` archive |
-| `--szs` | Pack a folder into a Yaz0-compressed `.szs` archive |
-| `--extract` | Extract a `.arc` or `.szs` archive to a folder |
-| `--bmd2dae` | Convert `.bmd` / `.bdl` to Collada `.dae` (via BMD_analysis) |
-| `--bmd2fbx` | Convert `.bmd` / `.bdl` to `.fbx` (via FBX_analysis) |
-| `--bmd2obj` | Convert `.bmd` / `.bdl` to `.obj` + `.mtl` (via BMD_analysis) |
-| `--dae2bmd` | Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
-| `--obj2grid` | Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin` |
-
-Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
+|--------|------|
+| `--pack` | フォルダをRARCアーカイブ (`.arc`) にパック / Pack a folder into a RARC `.arc` archive |
+| `--szs` | フォルダをYaz0圧縮アーカイブ (`.szs`) にパック / Pack a folder into a Yaz0-compressed `.szs` archive|
+| `--extract` | `.arc` / `.szs` アーカイブをフォルダに展開 / Extract a `.arc` or `.szs` archive to a folder |
+| `--bmd2dae` | `.bmd` / `.bdl` をCollada形式 `.dae` に変換 (BMD_analysis使用) / Convert `.bmd` / `.bdl` to Collada `.dae` (via BMD_analysis)|
+| `--bmd2fbx` | `.bmd` / `.bdl` を `.fbx` に変換 (FBX_analysis使用)/ Convert `.bmd` / `.bdl` to `.fbx` (via FBX_analysis)   |
+| `--bmd2obj` | `.bmd` / `.bdl` を `.obj` + `.mtl` に変換 (BMD_analysis使用)/ Convert `.bmd` / `.bdl` to `.obj` + `.mtl` (via BMD_analysis) |
+| `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) / Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
+| `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 /  Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin`  |
 
 ## Setup
 
