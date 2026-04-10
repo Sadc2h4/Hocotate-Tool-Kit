@@ -4,14 +4,8 @@
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D4?style=flat-square&logo=windows&logoColor=white)
 ![Architecture](https://img.shields.io/badge/arch-x64-gray?style=flat-square)
 
-```
-                       _        _         _____            _   _    _ _   
-  /\  /\___   ___ ___ | |_ __ _| |_ ___  /__   \___   ___ | | | | _(_) |_ 
- / /_/ / _ \ / __/ _ \| __/ _` | __/ _ \   / /\/ _ \ / _ \| | | |/ / | __|
-/ __  / (_) | (_| (_) | || (_| | ||  __/  / / | (_) | (_) | | |   <| | |_ 
-\/ /_/ \___/ \___\___/ \__\__,_|\__\___|  \/   \___/ \___/|_| |_|\_\_|\__|
-Created by : C2H4
-```
+<img width="800" height="580" alt="HokotateToolKit" src="https://github.com/user-attachments/assets/7180c3d6-cb80-4cd4-b8c8-bae866265334" />
+
 
 ## Download
 
@@ -23,7 +17,7 @@ Created by : C2H4
   />
 </a>
 <br>
-<a href="https://uu.getuploader.com/freehack/download/200">
+<a href="https://www.dropbox.com/scl/fi/rbeafv64oghsc0r7hpca5/Hocotate_Toolkit_v1.12a.zip?rlkey=f4736wms8ugrdxzx8l0wkj86f&st=tljk1z95&dl=0">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_3.png"
     alt="Download .zip"
@@ -107,6 +101,7 @@ Output is placed in a subfolder named after the input file, at the same director
 | `.obj` | `--obj2grid` |
 
 ### Command Line / コマンドライン
+<img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/ed6b1850-b27c-4907-97b3-b96f29b6d657" />
 
 ```
 Hocotate_Toolkit.exe --<mode> <input> [output]
