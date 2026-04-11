@@ -26,6 +26,28 @@
 </a>
 <br>
 
+## Credits
+
+各機能の処理で参考にしたアプリと作者は以下の通りです．  
+勝手に内容を参考にしたことをお詫びするとともに，情報を共有してくださったことに感謝いたします．
+
+----------------------------------------------------------------------------------------------------
+
+The following applications and authors were referenced for each feature.  
+thank the authors for sharing it.
+
+| Operation | Reference Application | Author |
+|--------|------|------|
+| `--pack` | `RARCPack` | `Yoshi2` |
+| `--szs` | `RARCPack` | `Yoshi2` |
+| `--extract` | `ARCExtractor` | `cuzitsjonny` |
+| `--bmd2dae` | `SuperBMD_2.4.2.1_RC` | `RenolY2` |
+| `--bmd2fbx` | `MeltyTool` | `MeltyPlayer` |
+| `--bmd2obj` | `obj2grid` | `RenolY2` |
+| `--dae2bmd` | `SuperBMD_2.4.2.1_RC` | `RenolY2` |
+| `--obj2grid` | `obj2grid` | `RenolY2` |
+
+
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
