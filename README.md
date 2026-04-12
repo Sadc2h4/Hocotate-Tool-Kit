@@ -19,7 +19,7 @@
 <br>
 <a href="https://www.dropbox.com/scl/fi/rbeafv64oghsc0r7hpca5/Hocotate_Toolkit_v1.12a.zip?rlkey=f4736wms8ugrdxzx8l0wkj86f&st=tljk1z95&dl=0">
   <img
-    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_3.png"
+    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
     height="48"
   />
@@ -34,13 +34,15 @@
 ----------------------------------------------------------------------------------------------------
 
 The following applications and authors were referenced for each feature.  
-thank the authors for sharing it.
+Thank the authors for sharing it.
 
 | Operation | Reference Application | Author |
 |--------|------|------|
 | `--pack` | `RARCPack` | `Yoshi2` |
 | `--szs` | `RARCPack` | `Yoshi2` |
 | `--extract` | `ARCExtractor` | `cuzitsjonny` |
+| `--gcextract` | `DiscExtract` | `jordan-woyak (Dolphin / DolphinTool reference)` |
+| `--gcrebuild` | `DiscRebuild` | `jordan-woyak (Dolphin / DolphinTool reference)` |
 | `--bmd2dae` | `SuperBMD_2.4.2.1_RC` | `RenolY2` |
 | `--bmd2fbx` | `MeltyTool` | `MeltyPlayer` |
 | `--bmd2obj` | `obj2grid` | `RenolY2` |
@@ -51,13 +53,13 @@ thank the authors for sharing it.
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
-**8種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
+**10種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
 
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
-It supports **8 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+It supports **10 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
 Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
@@ -65,29 +67,36 @@ Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bm
 | `--pack` | フォルダをRARCアーカイブ (`.arc`) にパック / Pack a folder into a RARC `.arc` archive |
 | `--szs` | フォルダをYaz0圧縮アーカイブ (`.szs`) にパック / Pack a folder into a Yaz0-compressed `.szs` archive|
 | `--extract` | `.arc` / `.szs` アーカイブをフォルダに展開 / Extract a `.arc` or `.szs` archive to a folder |
+| `--gcextract` | `.iso` / `.gcm` から GameCube ディスク全体を `files` + `sys` に抽出 / Extract a full GameCube disc from `.iso` / `.gcm` into `files` + `sys` |
+| `--gcrebuild` | `sys` + `files` フォルダから GameCube ディスクを `.iso` / `.gcm` に再構築 / Rebuild a GameCube disc from `sys` + `files` into `.iso` / `.gcm` |
 | `--bmd2dae` | `.bmd` / `.bdl` をCollada形式 `.dae` に変換 (BMD_analysis使用) / Convert `.bmd` / `.bdl` to Collada `.dae` (via BMD_analysis)|
 | `--bmd2fbx` | `.bmd` / `.bdl` を `.fbx` に変換 (FBX_analysis使用)/ Convert `.bmd` / `.bdl` to `.fbx` (via FBX_analysis)   |
 | `--bmd2obj` | `.bmd` / `.bdl` を `.obj` + `.mtl` に変換 (BMD_analysis使用)/ Convert `.bmd` / `.bdl` to `.obj` + `.mtl` (via BMD_analysis) |
 | `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) / Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
 | `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 /  Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin`  |
 
+
 ## Setup
 
 以下のファイルを同一フォルダにまとめて配置してください．  
 `Hocotate_Toolkit.exe` は自己完結型のシングルファイルバイナリのため，.NET のインストールは不要です．  
 `resource\` フォルダは必ず exe と同じ階層に置いてください．
+GameCube ディスクの抽出・再構築機能を使う場合は `DiscExtract.exe` と `DiscRebuild.exe` も `resource\` に配置してください．
 
 ----------------------------------------------------------------------------------------------------
 
 Place the following files together in one folder.  
 `Hocotate_Toolkit.exe` is a self-contained single-file binary; no .NET installation is required.  
 The `resource\` folder must stay in the same directory as the exe.
+For the GameCube disc features, also place `DiscExtract.exe` and `DiscRebuild.exe` inside `resource\`.
 
 ```
 Hocotate_Toolkit.exe
 Register_ContextMenu.bat
 Unregister_ContextMenu.bat
 resource\
+    DiscExtract.exe
+    DiscRebuild.exe
     BMD_analysis.exe
     FBX_analysis.exe
     AssimpNet.dll
@@ -116,8 +125,9 @@ Output is placed in a subfolder named after the input file, at the same director
 
 | ドロップ対象 / Dropped item | 実行される処理 / Action |
 |-----------------------------|-------------------------|
-| フォルダ / Folder | `--szs` (Yaz0圧縮アーカイブ / Yaz0-compressed archive) |
+| フォルダ / Folder | `--szs` または `--gcrebuild` (`sys` + `files` があればGCディスク再構築 / rebuild GC disc if `sys` + `files` exist) |
 | `.arc` / `.szs` | `--extract` (展開 / Extract) |
+| `.iso` / `.gcm` | `--gcextract` (GameCube ディスク全体抽出 / full GameCube disc extract) |
 | `.bmd` / `.bdl` | bmd2dae + bmd2fbx + bmd2obj (3種一括 / all three) |
 | `.dae` | `--dae2bmd` |
 | `.obj` | `--obj2grid` |
@@ -142,6 +152,12 @@ Hocotate_Toolkit.exe --szs "C:\path\to\folder"
 :: .arc / .szs を展開 / Extract .arc or .szs
 Hocotate_Toolkit.exe --extract "C:\path\to\file.szs"
 
+:: GameCube ISO/GCM を files + sys に展開 / Extract GameCube ISO/GCM to files + sys
+Hocotate_Toolkit.exe --gcextract "C:\path\to\game.iso"
+
+:: sys + files から GameCube ISO を再構築 / Rebuild GameCube ISO from sys + files
+Hocotate_Toolkit.exe --gcrebuild "C:\path\to\game_folder"
+
 :: BMD を Collada に変換 / Convert BMD to Collada
 Hocotate_Toolkit.exe --bmd2dae "C:\path\to\model.bmd"
 
@@ -158,14 +174,29 @@ Hocotate_Toolkit.exe --dae2bmd "C:\path\to\model.dae" "C:\path\to\out.bmd" --mat
 Hocotate_Toolkit.exe --obj2grid "C:\path\to\collision.obj"
 ```
 
+### GameCube Round-Trip Notes
+
+実ロムを用いた往復検証では，再構築した `.iso` が Dolphin で認識され，再抽出した `files` の内容も元と一致しました．  
+ただし，再構築後のイメージは元ROMと完全なバイナリ一致にはなりません．
+
+----------------------------------------------------------------------------------------------------
+
+In round-trip verification with a real GameCube ISO, the rebuilt image was recognized by Dolphin, and
+the re-extracted `files` contents matched the original. However, the rebuilt image is not expected to
+be byte-identical to the source disc.
+
+- Rebuilt images may differ in total ISO/GCM file size.
+- `sys\boot.bin` may differ because DOL/FST/user area offsets are rewritten.
+- `sys\fst.bin` may differ because the file system table is regenerated during rebuild.
+
 ### Context Menu / 右クリックメニュー連携
 
-`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.bmd`・`.bdl`・`.dae`・`.obj` およびフォルダの右クリックメニューに **"Hocotate Toolkit"** の項目が追加されます．  
+`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.bmd`・`.bdl`・`.dae`・`.obj` およびフォルダの右クリックメニューに **"Hocotate Toolkit"** の項目が追加されます．  
 管理者権限は不要です（ユーザー単位のレジストリ HKCU に登録されます）．
 
 ----------------------------------------------------------------------------------------------------
 
-Run `Register_ContextMenu.bat` to add **"Hocotate Toolkit"** entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.bmd`, `.bdl`, `.dae`, `.obj`) and folders.  
+Run `Register_ContextMenu.bat` to add **"Hocotate Toolkit"** entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.bmd`, `.bdl`, `.dae`, `.obj`) and folders.  
 No administrator rights are required — entries are registered per-user (HKCU).
 
 ```bat
