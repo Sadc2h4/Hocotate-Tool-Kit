@@ -36,4 +36,13 @@
     <EnableSourceLink>false</EnableSourceLink>
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DiscExtract\**\*.cs" />
+    <Compile Remove="DiscRebuild\**\*.cs" />
+    <EmbeddedResource Remove="DiscExtract\**\*" />
+    <EmbeddedResource Remove="DiscRebuild\**\*" />
+    <None Remove="DiscExtract\**\*" />
+    <None Remove="DiscRebuild\**\*" />
+  </ItemGroup>
 </Project>

@@ -74,6 +74,8 @@ namespace RARCToolkit
                     "pack"     => DoPack(input, OptArg(args, 2)),
                     "szs"      => DoSzs(input,  OptArg(args, 2)),
                     "extract"  => DoExtract(input, OptArg(args, 2)),
+                    "gcextract"=> DoGcExtract(input, OptArg(args, 2)),
+                    "gcrebuild"=> DoGcRebuild(input, OptArg(args, 2)),
                     "bmd2dae"  => DoBmd2Dae(input, OptArg(args, 2)),
                     "dae2bmd"  => DoDae2Bmd(args),
                     "bmd2fbx"  => DoBmd2Fbx(input, OptArg(args, 2)),
@@ -102,8 +104,16 @@ namespace RARCToolkit
             {
                 if (Directory.Exists(path))
                 {
-                    Console.WriteLine("[Folder] -> SZS pack");
-                    result = DoSzs(path, null);
+                    if (LooksLikeGameCubeDiscRoot(path))
+                    {
+                        Console.WriteLine("[Folder] -> Rebuild GameCube disc");
+                        result = DoGcRebuild(path, null);
+                    }
+                    else
+                    {
+                        Console.WriteLine("[Folder] -> SZS pack");
+                        result = DoSzs(path, null);
+                    }
                 }
                 else if (File.Exists(path))
                 {
@@ -111,6 +121,7 @@ namespace RARCToolkit
                     result = ext switch
                     {
                         ".arc" or ".szs" => RunExtract(path),
+                        ".iso" or ".gcm" => RunGcExtract(path),
                         ".bmd" or ".bdl" => RunBmdAll(path),
                         ".dae"           => RunDae2Bmd(path),
                         ".obj"           => RunObj2Grid(path),
@@ -154,6 +165,18 @@ namespace RARCToolkit
             return overall;
         }
 
+        static int RunGcExtract(string path)
+        {
+            Console.WriteLine("[ISO/GCM] -> Extract GameCube disc");
+            return DoGcExtract(path, null);
+        }
+
+        static int RunGcRebuild(string path)
+        {
+            Console.WriteLine("[Folder] -> Rebuild GameCube disc");
+            return DoGcRebuild(path, null);
+        }
+
         static int RunDae2Bmd(string path)
         {
             Console.WriteLine("[DAE] -> BMD conversion");
@@ -169,7 +192,7 @@ namespace RARCToolkit
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .bmd, .bdl, .dae, .obj");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .bmd, .bdl, .dae, .obj");
             return 1;
         }
 
@@ -226,6 +249,20 @@ namespace RARCToolkit
             Console.WriteLine($"Extract: {inputPath} -> {outputDir}");
             new RARCExtractor().Extract(inputPath, outputDir);
             return 0;
+        }
+
+        static int DoGcExtract(string inputPath, string? outputDir)
+        {
+            RequireFile(inputPath);
+            Console.WriteLine($"GC extract: {inputPath} -> {outputDir ?? "(auto)"}");
+            return DiscExtractConvert.ExtractGameCubeDisc(inputPath, outputDir);
+        }
+
+        static int DoGcRebuild(string inputFolder, string? outputPath)
+        {
+            RequireDirectory(inputFolder);
+            Console.WriteLine($"GC rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
+            return DiscRebuildConvert.RebuildGameCubeDisc(inputFolder, outputPath);
         }
 
         // ── BMD_analysis wrapper ──────────────────────────────────────────────
@@ -310,6 +347,8 @@ namespace RARCToolkit
             {
                 (@"Software\Classes\.arc\shell\HocotateToolkit", "Hocotate Toolkit - Extract"),
                 (@"Software\Classes\.szs\shell\HocotateToolkit", "Hocotate Toolkit - Extract"),
+                (@"Software\Classes\.iso\shell\HocotateToolkit", "Hocotate Toolkit - Extract GC Disc"),
+                (@"Software\Classes\.gcm\shell\HocotateToolkit", "Hocotate Toolkit - Extract GC Disc"),
                 (@"Software\Classes\.bmd\shell\HocotateToolkit", "Hocotate Toolkit - Convert BMD"),
                 (@"Software\Classes\.bdl\shell\HocotateToolkit", "Hocotate Toolkit - Convert BMD"),
                 (@"Software\Classes\.dae\shell\HocotateToolkit", "Hocotate Toolkit - DAE to BMD"),
@@ -324,12 +363,15 @@ namespace RARCToolkit
                     shellKey.SetValue("", label);
                     shellKey.SetValue("Icon", $"\"{exePath}\"");
                     using var cmdKey = Registry.CurrentUser.CreateSubKey(key + @"\command");
-                    cmdKey.SetValue("", $"\"{exePath}\" \"%1\"");
+                    string command = key.Contains(@"\.iso\") || key.Contains(@"\.gcm\")
+                        ? $"\"{exePath}\" --gcextract \"%1\""
+                        : $"\"{exePath}\" \"%1\"";
+                    cmdKey.SetValue("", command);
                 }
 
                 using var dirKey = Registry.CurrentUser.CreateSubKey(
                     @"Software\Classes\Directory\shell\HocotateToolkit");
-                dirKey.SetValue("", "Hocotate Toolkit - Pack to SZS");
+                dirKey.SetValue("", "Hocotate Toolkit - Pack to SZS / Rebuild GC Disc");
                 dirKey.SetValue("Icon", $"\"{exePath}\"");
                 using var dirCmd = Registry.CurrentUser.CreateSubKey(
                     @"Software\Classes\Directory\shell\HocotateToolkit\command");
@@ -355,6 +397,8 @@ namespace RARCToolkit
             {
                 @"Software\Classes\.arc\shell\HocotateToolkit",
                 @"Software\Classes\.szs\shell\HocotateToolkit",
+                @"Software\Classes\.iso\shell\HocotateToolkit",
+                @"Software\Classes\.gcm\shell\HocotateToolkit",
                 @"Software\Classes\.bmd\shell\HocotateToolkit",
                 @"Software\Classes\.bdl\shell\HocotateToolkit",
                 @"Software\Classes\.dae\shell\HocotateToolkit",
@@ -422,6 +466,18 @@ namespace RARCToolkit
         static string SiblingFile(string dirPath, string ext) =>
             Path.Combine(Path.GetDirectoryName(dirPath) ?? ".", Path.GetFileName(dirPath) + ext);
 
+        static bool LooksLikeGameCubeDiscRoot(string path)
+        {
+            string sys = Path.Combine(path, "sys");
+            string files = Path.Combine(path, "files");
+            return Directory.Exists(sys) &&
+                   Directory.Exists(files) &&
+                   File.Exists(Path.Combine(sys, "boot.bin")) &&
+                   File.Exists(Path.Combine(sys, "bi2.bin")) &&
+                   File.Exists(Path.Combine(sys, "apploader.img")) &&
+                   File.Exists(Path.Combine(sys, "main.dol"));
+        }
+
         static void RequireFile(string path)
         {
             if (!File.Exists(path))
@@ -443,11 +499,29 @@ namespace RARCToolkit
 
         static void PrintUsage()
         {
+            Console.WriteLine("Credits");
+            Console.WriteLine("  The following applications and authors were referenced for each feature.");
+            Console.WriteLine("  Thank you for sharing this information.");
+            Console.WriteLine();
+            Console.WriteLine("  Operation   Reference Application   Author");
+            Console.WriteLine("  --pack      RARCPack                Yoshi2");
+            Console.WriteLine("  --szs       RARCPack                Yoshi2");
+            Console.WriteLine("  --extract   ARCExtractor            cuzitsjonny");
+            Console.WriteLine("  --gcextract DiscExtract             jordan-woyak (Dolphin / DolphinTool reference)");
+            Console.WriteLine("  --gcrebuild DiscRebuild             jordan-woyak (Dolphin / DolphinTool reference)");
+            Console.WriteLine("  --bmd2dae   SuperBMD_2.4.2.1_RC     RenolY2");
+            Console.WriteLine("  --bmd2fbx   MeltyTool               MeltyPlayer");
+            Console.WriteLine("  --bmd2obj   obj2grid                RenolY2");
+            Console.WriteLine("  --dae2bmd   SuperBMD_2.4.2.1_RC     RenolY2");
+            Console.WriteLine("  --obj2grid  obj2grid                RenolY2");
+            Console.WriteLine();
             Console.WriteLine("Usage:");
             Console.WriteLine();
             Console.WriteLine("  [Drag & Drop]  Drop a file or folder directly onto this exe:");
             Console.WriteLine("    Folder           -> Pack to SZS (.szs)");
+            Console.WriteLine("                      -> Rebuild GC disc if sys + files are present");
             Console.WriteLine("    .arc / .szs      -> Extract");
+            Console.WriteLine("    .iso / .gcm      -> Extract GameCube disc (files + sys)");
             Console.WriteLine("    .bmd / .bdl      -> Convert to DAE + FBX + OBJ (batch)");
             Console.WriteLine("    .dae             -> Convert to BMD");
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
@@ -456,17 +530,28 @@ namespace RARCToolkit
             Console.WriteLine("    --pack     <folder>       [output.arc]");
             Console.WriteLine("    --szs      <folder>       [output.szs]");
             Console.WriteLine("    --extract  <.arc/.szs>    [output folder]");
+            Console.WriteLine("    --gcextract <.iso/.gcm>   [output folder]");
+            Console.WriteLine("    --gcrebuild <folder>      [output.iso/.gcm]");
             Console.WriteLine("    --bmd2dae  <.bmd>         [output.dae]");
             Console.WriteLine("    --dae2bmd  <.dae>         [output.bmd]  [--mat mat.json] [--texheader tex.json]");
             Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   * requires FBX_analysis.exe");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine();
+            Console.WriteLine("  [GC Disc Notes]");
+            Console.WriteLine("    --gcextract outputs files + sys for GameCube discs.");
+            Console.WriteLine("    --gcrebuild rebuilds a valid ISO/GCM from sys + files.");
+            Console.WriteLine("    Rebuilt images may differ in total ISO size and in sys\\boot.bin / sys\\fst.bin");
+            Console.WriteLine("    because file layout and FST offsets are regenerated during rebuild.");
+            Console.WriteLine("    In round-trip verification, the extracted files\\ contents matched the original.");
+            Console.WriteLine();
             Console.WriteLine("  [Context Menu]  (no admin rights required)");
             Console.WriteLine("    --register    Add right-click menu entries for supported file types");
             Console.WriteLine("    --unregister  Remove right-click menu entries");
             Console.WriteLine();
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
+            Console.WriteLine("    resource\\DiscExtract.exe  -> used by --gcextract");
+            Console.WriteLine("    resource\\DiscRebuild.exe  -> used by --gcrebuild");
             Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj");
             Console.WriteLine("    resource\\FBX_analysis.exe  -> used by --bmd2fbx");
         }
