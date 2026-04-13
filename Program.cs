@@ -74,6 +74,16 @@ namespace RARCToolkit
                     "pack"     => DoPack(input, OptArg(args, 2)),
                     "szs"      => DoSzs(input,  OptArg(args, 2)),
                     "extract"  => DoExtract(input, OptArg(args, 2)),
+                    "gcextract"=> DoGcExtract(input, OptArg(args, 2)),
+                    "wiiextract"=> DoWiiExtract(input, OptArg(args, 2)),
+                    "wiextract"=> DoWiiExtract(input, OptArg(args, 2)),
+                    "discextract"=> DoDiscExtract(input, OptArg(args, 2)),
+                    "gcrebuild"=> DoGcRebuild(input, OptArg(args, 2)),
+                    "wiirebuild"=> DoWiiRebuild(input, OptArg(args, 2)),
+                    "wirebuild"=> DoWiiRebuild(input, OptArg(args, 2)),
+                    "discrebuild"=> DoDiscRebuild(input, OptArg(args, 2)),
+                    "iso2wbfs"=> DoIsoToWbfs(input, OptArg(args, 2)),
+                    "isotowbfs"=> DoIsoToWbfs(input, OptArg(args, 2)),
                     "bmd2dae"  => DoBmd2Dae(input, OptArg(args, 2)),
                     "dae2bmd"  => DoDae2Bmd(args),
                     "bmd2fbx"  => DoBmd2Fbx(input, OptArg(args, 2)),
@@ -102,8 +112,21 @@ namespace RARCToolkit
             {
                 if (Directory.Exists(path))
                 {
-                    Console.WriteLine("[Folder] -> SZS pack");
-                    result = DoSzs(path, null);
+                    if (LooksLikeWiiDiscRoot(path))
+                    {
+                        Console.WriteLine("[Folder] -> Rebuild Wii disc");
+                        result = DoWiiRebuild(path, null);
+                    }
+                    else if (LooksLikeGameCubeDiscRoot(path))
+                    {
+                        Console.WriteLine("[Folder] -> Rebuild GameCube disc");
+                        result = DoGcRebuild(path, null);
+                    }
+                    else
+                    {
+                        Console.WriteLine("[Folder] -> SZS pack");
+                        result = DoSzs(path, null);
+                    }
                 }
                 else if (File.Exists(path))
                 {
@@ -111,6 +134,7 @@ namespace RARCToolkit
                     result = ext switch
                     {
                         ".arc" or ".szs" => RunExtract(path),
+                        ".iso" or ".gcm" or ".wbfs" => RunDiscExtract(path),
                         ".bmd" or ".bdl" => RunBmdAll(path),
                         ".dae"           => RunDae2Bmd(path),
                         ".obj"           => RunObj2Grid(path),
@@ -154,6 +178,24 @@ namespace RARCToolkit
             return overall;
         }
 
+        static int RunDiscExtract(string path)
+        {
+            Console.WriteLine("[ISO/GCM/WBFS] -> Extract disc");
+            return DoDiscExtract(path, null);
+        }
+
+        static int RunGcRebuild(string path)
+        {
+            Console.WriteLine("[Folder] -> Rebuild GameCube disc");
+            return DoGcRebuild(path, null);
+        }
+
+        static int RunWiiRebuild(string path)
+        {
+            Console.WriteLine("[Folder] -> Rebuild Wii disc");
+            return DoWiiRebuild(path, null);
+        }
+
         static int RunDae2Bmd(string path)
         {
             Console.WriteLine("[DAE] -> BMD conversion");
@@ -169,7 +211,7 @@ namespace RARCToolkit
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .bmd, .bdl, .dae, .obj");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .obj");
             return 1;
         }
 
@@ -226,6 +268,55 @@ namespace RARCToolkit
             Console.WriteLine($"Extract: {inputPath} -> {outputDir}");
             new RARCExtractor().Extract(inputPath, outputDir);
             return 0;
+        }
+
+        static int DoGcExtract(string inputPath, string? outputDir)
+        {
+            RequireFile(inputPath);
+            Console.WriteLine($"GC extract: {inputPath} -> {outputDir ?? "(auto)"}");
+            return DiscExtractConvert.ExtractGameCubeDisc(inputPath, outputDir);
+        }
+
+        static int DoWiiExtract(string inputPath, string? outputDir)
+        {
+            RequireFile(inputPath);
+            Console.WriteLine($"Wii extract: {inputPath} -> {outputDir ?? "(auto)"}");
+            return DiscExtractConvert.ExtractWiiDisc(inputPath, outputDir);
+        }
+
+        static int DoDiscExtract(string inputPath, string? outputDir)
+        {
+            RequireFile(inputPath);
+            Console.WriteLine($"Disc extract: {inputPath} -> {outputDir ?? "(auto)"}");
+            return DiscExtractConvert.ExtractDiscImage(inputPath, outputDir);
+        }
+
+        static int DoGcRebuild(string inputFolder, string? outputPath)
+        {
+            RequireDirectory(inputFolder);
+            Console.WriteLine($"GC rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
+            return DiscRebuildConvert.RebuildGameCubeDisc(inputFolder, outputPath);
+        }
+
+        static int DoWiiRebuild(string inputFolder, string? outputPath)
+        {
+            RequireDirectory(inputFolder);
+            Console.WriteLine($"Wii rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
+            return DiscRebuildConvert.RebuildWiiDisc(inputFolder, outputPath);
+        }
+
+        static int DoIsoToWbfs(string inputIso, string? outputPath)
+        {
+            RequireFile(inputIso);
+            Console.WriteLine($"ISO to WBFS: {inputIso} -> {outputPath ?? "(auto)"}");
+            return DiscRebuildConvert.ConvertIsoToWbfs(inputIso, outputPath);
+        }
+
+        static int DoDiscRebuild(string inputFolder, string? outputPath)
+        {
+            RequireDirectory(inputFolder);
+            Console.WriteLine($"Disc rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
+            return DiscRebuildConvert.RebuildDisc(inputFolder, outputPath);
         }
 
         // ── BMD_analysis wrapper ──────────────────────────────────────────────
@@ -306,34 +397,21 @@ namespace RARCToolkit
             string exePath = Environment.ProcessPath
                           ?? System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName!;
 
-            var entries = new (string key, string label)[]
-            {
-                (@"Software\Classes\.arc\shell\HocotateToolkit", "Hocotate Toolkit - Extract"),
-                (@"Software\Classes\.szs\shell\HocotateToolkit", "Hocotate Toolkit - Extract"),
-                (@"Software\Classes\.bmd\shell\HocotateToolkit", "Hocotate Toolkit - Convert BMD"),
-                (@"Software\Classes\.bdl\shell\HocotateToolkit", "Hocotate Toolkit - Convert BMD"),
-                (@"Software\Classes\.dae\shell\HocotateToolkit", "Hocotate Toolkit - DAE to BMD"),
-                (@"Software\Classes\.obj\shell\HocotateToolkit", "Hocotate Toolkit - OBJ to grid.bin"),
-            };
-
             try
             {
-                foreach (var (key, label) in entries)
-                {
-                    using var shellKey = Registry.CurrentUser.CreateSubKey(key);
-                    shellKey.SetValue("", label);
-                    shellKey.SetValue("Icon", $"\"{exePath}\"");
-                    using var cmdKey = Registry.CurrentUser.CreateSubKey(key + @"\command");
-                    cmdKey.SetValue("", $"\"{exePath}\" \"%1\"");
-                }
-
-                using var dirKey = Registry.CurrentUser.CreateSubKey(
-                    @"Software\Classes\Directory\shell\HocotateToolkit");
-                dirKey.SetValue("", "Hocotate Toolkit - Pack to SZS");
-                dirKey.SetValue("Icon", $"\"{exePath}\"");
-                using var dirCmd = Registry.CurrentUser.CreateSubKey(
-                    @"Software\Classes\Directory\shell\HocotateToolkit\command");
-                dirCmd.SetValue("", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".arc", "Hocotate Toolkit - Extract", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".szs", "Hocotate Toolkit - Extract", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".iso", "Hocotate Toolkit - Extract Disc", $"\"{exePath}\" --discextract \"%1\"");
+                RegisterNamedFileAssociation(exePath, ".iso", "HocotateToolkitIso2Wbfs", "Hocotate Toolkit - Convert ISO to WBFS", $"\"{exePath}\" --iso2wbfs \"%1\"");
+                RegisterFileAssociation(exePath, ".gcm", "Hocotate Toolkit - Extract Disc", $"\"{exePath}\" --discextract \"%1\"");
+                RegisterFileAssociation(exePath, ".wbfs", "Hocotate Toolkit - Extract Wii Disc", $"\"{exePath}\" --wiiextract \"%1\"");
+                RegisterFileAssociation(exePath, ".bmd", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".bdl", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".dae", "Hocotate Toolkit - DAE to BMD", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".obj", "Hocotate Toolkit - OBJ to grid.bin", $"\"{exePath}\" \"%1\"");
+                RegisterDirectoryAssociation(exePath, "HocotateToolkitPack", "Hocotate Toolkit - Pack to SZS", $"\"{exePath}\" --szs \"%1\"");
+                RegisterDirectoryAssociation(exePath, "HocotateToolkitGcRebuild", "Hocotate Toolkit - Rebuild GC Disc", $"\"{exePath}\" --gcrebuild \"%1\"");
+                RegisterDirectoryAssociation(exePath, "HocotateToolkitWiiRebuild", "Hocotate Toolkit - Rebuild Wii Disc", $"\"{exePath}\" --wiirebuild \"%1\"");
 
                 Console.WriteLine("Context menu registered successfully.");
             }
@@ -343,29 +421,27 @@ namespace RARCToolkit
                 return 1;
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Press any key to close...");
-            Console.ReadKey();
+            WaitForKeyIfInteractive();
             return 0;
         }
 
         static int DoUnregister()
         {
-            var keys = new[]
-            {
-                @"Software\Classes\.arc\shell\HocotateToolkit",
-                @"Software\Classes\.szs\shell\HocotateToolkit",
-                @"Software\Classes\.bmd\shell\HocotateToolkit",
-                @"Software\Classes\.bdl\shell\HocotateToolkit",
-                @"Software\Classes\.dae\shell\HocotateToolkit",
-                @"Software\Classes\.obj\shell\HocotateToolkit",
-                @"Software\Classes\Directory\shell\HocotateToolkit",
-            };
-
             try
             {
-                foreach (var key in keys)
-                    Registry.CurrentUser.DeleteSubKeyTree(key, throwOnMissingSubKey: false);
+                UnregisterFileAssociation(".arc");
+                UnregisterFileAssociation(".szs");
+                UnregisterFileAssociation(".iso");
+                UnregisterNamedFileAssociation(".iso", "HocotateToolkitIso2Wbfs");
+                UnregisterFileAssociation(".gcm");
+                UnregisterFileAssociation(".wbfs");
+                UnregisterFileAssociation(".bmd");
+                UnregisterFileAssociation(".bdl");
+                UnregisterFileAssociation(".dae");
+                UnregisterFileAssociation(".obj");
+                UnregisterDirectoryAssociation("HocotateToolkitPack");
+                UnregisterDirectoryAssociation("HocotateToolkitGcRebuild");
+                UnregisterDirectoryAssociation("HocotateToolkitWiiRebuild");
 
                 Console.WriteLine("Context menu unregistered successfully.");
             }
@@ -375,10 +451,86 @@ namespace RARCToolkit
                 return 1;
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Press any key to close...");
-            Console.ReadKey();
+            WaitForKeyIfInteractive();
             return 0;
+        }
+
+        static void RegisterFileAssociation(string exePath, string extension, string label, string command)
+            => RegisterNamedFileAssociation(exePath, extension, "HocotateToolkit", label, command);
+
+        static void RegisterNamedFileAssociation(string exePath, string extension, string keyName, string label, string command)
+        {
+            foreach (string key in EnumerateContextMenuKeys(extension, keyName))
+            {
+                using var shellKey = Registry.CurrentUser.CreateSubKey(key);
+                shellKey.SetValue("", label);
+                shellKey.SetValue("Icon", $"\"{exePath}\"");
+                using var cmdKey = Registry.CurrentUser.CreateSubKey(key + @"\command");
+                cmdKey.SetValue("", command);
+            }
+        }
+
+        static void UnregisterFileAssociation(string extension)
+            => UnregisterNamedFileAssociation(extension, "HocotateToolkit");
+
+        static void UnregisterNamedFileAssociation(string extension, string keyName)
+        {
+            foreach (string key in EnumerateContextMenuKeys(extension, keyName))
+                Registry.CurrentUser.DeleteSubKeyTree(key, throwOnMissingSubKey: false);
+        }
+
+        static void RegisterDirectoryAssociation(string exePath, string keyName, string label, string command)
+        {
+            string key = $@"Software\Classes\Directory\shell\{keyName}";
+            using var shellKey = Registry.CurrentUser.CreateSubKey(key);
+            shellKey.SetValue("", label);
+            shellKey.SetValue("Icon", $"\"{exePath}\"");
+            using var cmdKey = Registry.CurrentUser.CreateSubKey(key + @"\command");
+            cmdKey.SetValue("", command);
+        }
+
+        static void UnregisterDirectoryAssociation(string keyName)
+        {
+            Registry.CurrentUser.DeleteSubKeyTree(
+                $@"Software\Classes\Directory\shell\{keyName}",
+                throwOnMissingSubKey: false);
+        }
+
+        static IEnumerable<string> EnumerateContextMenuKeys(string extension, string keyName)
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                $@"Software\Classes\{extension}\shell\{keyName}",
+                $@"Software\Classes\SystemFileAssociations\{extension}\shell\{keyName}",
+            };
+
+            string? progId = GetProgIdForExtension(extension);
+            if (!string.IsNullOrWhiteSpace(progId))
+                keys.Add($@"Software\Classes\{progId}\shell\{keyName}");
+
+            return keys;
+        }
+
+        static string? GetProgIdForExtension(string extension)
+        {
+            using var extKey = Registry.ClassesRoot.OpenSubKey(extension);
+            return extKey?.GetValue(null) as string;
+        }
+
+        static void WaitForKeyIfInteractive()
+        {
+            if (Console.IsInputRedirected || Console.IsOutputRedirected)
+                return;
+
+            try
+            {
+                Console.WriteLine();
+                Console.WriteLine("Press any key to close...");
+                Console.ReadKey();
+            }
+            catch (InvalidOperationException)
+            {
+            }
         }
 
         // ── Common helpers ────────────────────────────────────────────────────
@@ -422,6 +574,29 @@ namespace RARCToolkit
         static string SiblingFile(string dirPath, string ext) =>
             Path.Combine(Path.GetDirectoryName(dirPath) ?? ".", Path.GetFileName(dirPath) + ext);
 
+        static bool LooksLikeGameCubeDiscRoot(string path)
+        {
+            string sys = Path.Combine(path, "sys");
+            string files = Path.Combine(path, "files");
+            return Directory.Exists(sys) &&
+                   Directory.Exists(files) &&
+                   File.Exists(Path.Combine(sys, "boot.bin")) &&
+                   File.Exists(Path.Combine(sys, "bi2.bin")) &&
+                   File.Exists(Path.Combine(sys, "apploader.img")) &&
+                   File.Exists(Path.Combine(sys, "main.dol"));
+        }
+
+        static bool LooksLikeWiiDiscRoot(string path)
+        {
+            if (!LooksLikeGameCubeDiscRoot(path))
+                return false;
+
+            return Directory.Exists(Path.Combine(path, "disc")) &&
+                   File.Exists(Path.Combine(path, "ticket.bin")) &&
+                   File.Exists(Path.Combine(path, "tmd.bin")) &&
+                   File.Exists(Path.Combine(path, "cert.bin"));
+        }
+
         static void RequireFile(string path)
         {
             if (!File.Exists(path))
@@ -443,11 +618,33 @@ namespace RARCToolkit
 
         static void PrintUsage()
         {
+            Console.WriteLine("Credits");
+            Console.WriteLine("  Hocotate Toolkit is created by C2H4.");
+            Console.WriteLine("  The following applications and reference authors were consulted during implementation.");
+            Console.WriteLine();
+            Console.WriteLine("  Operation   Reference Application   Reference Author");
+            Console.WriteLine("  --pack      RARCPack                Yoshi2");
+            Console.WriteLine("  --szs       RARCPack                Yoshi2");
+            Console.WriteLine("  --extract   ARCExtractor            cuzitsjonny");
+            Console.WriteLine("  --gcextract DiscExtract             jordan-woyak");
+            Console.WriteLine("  --wiiextract DiscExtract            jordan-woyak");
+            Console.WriteLine("  --gcrebuild DiscRebuild             jordan-woyak");
+            Console.WriteLine("  --wiirebuild DiscRebuild            jordan-woyak");
+            Console.WriteLine("  --iso2wbfs  DiscRebuild             jordan-woyak");
+            Console.WriteLine("  --bmd2dae   SuperBMD_2.4.2.1_RC     RenolY2");
+            Console.WriteLine("  --bmd2fbx   MeltyTool               MeltyPlayer");
+            Console.WriteLine("  --bmd2obj   obj2grid                RenolY2");
+            Console.WriteLine("  --dae2bmd   SuperBMD_2.4.2.1_RC     RenolY2");
+            Console.WriteLine("  --obj2grid  obj2grid                RenolY2");
+            Console.WriteLine();
             Console.WriteLine("Usage:");
             Console.WriteLine();
             Console.WriteLine("  [Drag & Drop]  Drop a file or folder directly onto this exe:");
             Console.WriteLine("    Folder           -> Pack to SZS (.szs)");
+            Console.WriteLine("                      -> Rebuild GC/Wii disc if sys + files are present");
             Console.WriteLine("    .arc / .szs      -> Extract");
+            Console.WriteLine("    .iso / .gcm      -> Extract GameCube or Wii disc");
+            Console.WriteLine("    .wbfs            -> Extract Wii disc");
             Console.WriteLine("    .bmd / .bdl      -> Convert to DAE + FBX + OBJ (batch)");
             Console.WriteLine("    .dae             -> Convert to BMD");
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
@@ -456,17 +653,37 @@ namespace RARCToolkit
             Console.WriteLine("    --pack     <folder>       [output.arc]");
             Console.WriteLine("    --szs      <folder>       [output.szs]");
             Console.WriteLine("    --extract  <.arc/.szs>    [output folder]");
+            Console.WriteLine("    --gcextract <.iso/.gcm>   [output folder]");
+            Console.WriteLine("    --wiiextract <.iso/.wbfs> [output folder]");
+            Console.WriteLine("    --discextract <disc image> [output folder]");
+            Console.WriteLine("    --gcrebuild <folder>      [output.iso/.gcm]");
+            Console.WriteLine("    --wiirebuild <folder>     [output.iso/.wbfs]");
+            Console.WriteLine("    --discrebuild <folder>    [output image]");
+            Console.WriteLine("    --iso2wbfs  <input.iso>   [output.wbfs]");
             Console.WriteLine("    --bmd2dae  <.bmd>         [output.dae]");
             Console.WriteLine("    --dae2bmd  <.dae>         [output.bmd]  [--mat mat.json] [--texheader tex.json]");
             Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   * requires FBX_analysis.exe");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine();
+            Console.WriteLine("  [GC Disc Notes]");
+            Console.WriteLine("    --gcextract outputs files + sys for GameCube discs.");
+            Console.WriteLine("    --wiiextract outputs files + sys plus Wii partition metadata.");
+            Console.WriteLine("    --gcrebuild rebuilds a valid ISO/GCM from sys + files.");
+            Console.WriteLine("    --wiirebuild rebuilds a Wii ISO/WBFS from sys + files + partition metadata.");
+            Console.WriteLine("    Rebuilt images may differ in total ISO size and in sys\\boot.bin / sys\\fst.bin");
+            Console.WriteLine("    because file layout and FST offsets are regenerated during rebuild.");
+            Console.WriteLine("    In round-trip verification, the extracted files\\ contents matched the original.");
+            Console.WriteLine();
             Console.WriteLine("  [Context Menu]  (no admin rights required)");
             Console.WriteLine("    --register    Add right-click menu entries for supported file types");
             Console.WriteLine("    --unregister  Remove right-click menu entries");
+            Console.WriteLine("    Folder menu   -> Pack to SZS / Rebuild GC Disc / Rebuild Wii Disc");
+            Console.WriteLine("    .iso menu     -> Extract Disc / Convert ISO to WBFS");
             Console.WriteLine();
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
+            Console.WriteLine("    resource\\DiscExtract.exe  -> used by --gcextract / --wiiextract");
+            Console.WriteLine("    resource\\DiscRebuild.exe  -> used by --gcrebuild / --wiirebuild / --iso2wbfs");
             Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj");
             Console.WriteLine("    resource\\FBX_analysis.exe  -> used by --bmd2fbx");
         }
