@@ -213,6 +213,7 @@ be byte-identical to the source disc.
 <img width="500" height="300" alt="HokotateToolKit3" src="https://github.com/user-attachments/assets/79bf8bdd-37af-4ed5-bd63-d5843edbf08a" />
 
 Wii 再構築では `ticket.bin`・`tmd.bin`・`cert.bin`・`disc\header.bin`・`disc\region.bin` を使ってゲームパーティションを再構成し，出力拡張子に応じて `.iso` または `.wbfs` を生成します．  
+
 ----------------------------------------------------------------------------------------------------
 Wii rebuild uses `ticket.bin`, `tmd.bin`, `cert.bin`, `disc\header.bin`, and `disc\region.bin` to reconstruct the game partition and outputs either `.iso` or `.wbfs` depending on the requested extension.
 
