@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://www.dropbox.com/scl/fi/rbeafv64oghsc0r7hpca5/Hocotate_Toolkit_v1.12a.zip?rlkey=f4736wms8ugrdxzx8l0wkj86f&st=tljk1z95&dl=0">
+<a href="https://www.dropbox.com/scl/fi/fot43xbinvkvnldc6iaq1/Hocotate_Toolkit_v1.22b.zip?rlkey=xx7pxdtla3hh9kkq5ffjj7x1q&st=cw3ejiw5&dl=0">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -193,6 +193,7 @@ Hocotate_Toolkit.exe --obj2grid "C:\path\to\collision.obj"
 ```
 
 ### GameCube Round-Trip Notes
+<img width="500" height="350" alt="HokotateToolKit2" src="https://github.com/user-attachments/assets/006d1a4e-ca04-423c-9d29-f8a5cede1394" />
 
 実ロムを用いた往復検証では，再構築した `.iso` が Dolphin で認識され，再抽出した `files` の内容も元と一致しました．  
 ただし，再構築後のイメージは元ROMと完全なバイナリ一致にはなりません．
@@ -209,7 +210,10 @@ be byte-identical to the source disc.
 
 ### Wii Round-Trip Notes
 
+<img width="500" height="300" alt="HokotateToolKit3" src="https://github.com/user-attachments/assets/79bf8bdd-37af-4ed5-bd63-d5843edbf08a" />
+
 Wii 再構築では `ticket.bin`・`tmd.bin`・`cert.bin`・`disc\header.bin`・`disc\region.bin` を使ってゲームパーティションを再構成し，出力拡張子に応じて `.iso` または `.wbfs` を生成します．  
+----------------------------------------------------------------------------------------------------
 Wii rebuild uses `ticket.bin`, `tmd.bin`, `cert.bin`, `disc\header.bin`, and `disc\region.bin` to reconstruct the game partition and outputs either `.iso` or `.wbfs` depending on the requested extension.
 
 ### Context Menu / 右クリックメニュー連携
