@@ -20,6 +20,7 @@ namespace RARCToolkit
             @"/ __  / (_) | (_| (_) | || (_| | ||  __/  / / | (_) | (_) | | |   <| | |_ ",
             @"\/ /_/ \___/ \___\___/ \__\__,_|\__\___|  \/   \___/ \___/|_| |_|\_\_|\__|",
             @"Created by : C2H4",
+            @"Version : 1.23a",
         };
 
         static void PrintBanner()
@@ -32,6 +33,21 @@ namespace RARCToolkit
 
         static int Main(string[] args)
         {
+            int exitCode = 1;
+
+            try
+            {
+                exitCode = RunMain(args);
+                return exitCode;
+            }
+            finally
+            {
+                WaitForKeyIfInteractive();
+            }
+        }
+
+        static int RunMain(string[] args)
+        {
             if (args.Length == 0)
             {
                 PrintBanner();
@@ -42,9 +58,6 @@ namespace RARCToolkit
                 Console.WriteLine("  1. Drag & drop a file or folder directly onto this exe.");
                 Console.WriteLine("  2. Call from a batch file or program with arguments.");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
-                Console.WriteLine();
-                Console.WriteLine("Press any key to close...");
-                Console.ReadKey();
                 return 1;
             }
 
@@ -88,6 +101,7 @@ namespace RARCToolkit
                     "dae2bmd"  => DoDae2Bmd(args),
                     "bmd2fbx"  => DoBmd2Fbx(input, OptArg(args, 2)),
                     "bmd2obj"  => DoBmd2Obj(input, OptArg(args, 2)),
+                    "fbx2bmd"  => DoFbx2Bmd(input, OptArg(args, 2)),
                     "obj2grid" => DoObj2Grid(args),
                     _ => UnknownMode(args[0]),
                 };
@@ -137,6 +151,7 @@ namespace RARCToolkit
                         ".iso" or ".gcm" or ".wbfs" => RunDiscExtract(path),
                         ".bmd" or ".bdl" => RunBmdAll(path),
                         ".dae"           => RunDae2Bmd(path),
+                        ".fbx"           => RunFbx2Bmd(path),
                         ".obj"           => RunObj2Grid(path),
                         _                => UnknownDrop(ext),
                     };
@@ -156,8 +171,6 @@ namespace RARCToolkit
             Console.WriteLine();
             Console.WriteLine("──────────────────────────────────────────────────────────────");
             Console.WriteLine(result == 0 ? "Done." : "Completed with errors.");
-            Console.WriteLine("Press any key to close...");
-            Console.ReadKey();
             return result;
         }
 
@@ -208,10 +221,16 @@ namespace RARCToolkit
             return DoObj2Grid(new[] { "--obj2grid", path });
         }
 
+        static int RunFbx2Bmd(string path)
+        {
+            Console.WriteLine("[FBX] -> BMD conversion");
+            return DoFbx2Bmd(path, null);
+        }
+
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .obj");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj");
             return 1;
         }
 
@@ -364,6 +383,12 @@ namespace RARCToolkit
             return SuperBMDConvert.Bmd2Obj(inputBmd, outputObj);
         }
 
+        static int DoFbx2Bmd(string inputFbx, string? outputBmd)
+        {
+            RequireFile(inputFbx);
+            return SuperBMDConvert.Fbx2Bmd(inputFbx, outputBmd);
+        }
+
         // ── obj2grid ─────────────────────────────────────────────────────────
 
         static int DoObj2Grid(string[] args)
@@ -408,6 +433,7 @@ namespace RARCToolkit
                 RegisterFileAssociation(exePath, ".bmd", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".bdl", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".dae", "Hocotate Toolkit - DAE to BMD", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".fbx", "Hocotate Toolkit - FBX to BMD", $"\"{exePath}\" --fbx2bmd \"%1\"");
                 RegisterFileAssociation(exePath, ".obj", "Hocotate Toolkit - OBJ to grid.bin", $"\"{exePath}\" \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitPack", "Hocotate Toolkit - Pack to SZS", $"\"{exePath}\" --szs \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitGcRebuild", "Hocotate Toolkit - Rebuild GC Disc", $"\"{exePath}\" --gcrebuild \"%1\"");
@@ -421,7 +447,6 @@ namespace RARCToolkit
                 return 1;
             }
 
-            WaitForKeyIfInteractive();
             return 0;
         }
 
@@ -438,6 +463,7 @@ namespace RARCToolkit
                 UnregisterFileAssociation(".bmd");
                 UnregisterFileAssociation(".bdl");
                 UnregisterFileAssociation(".dae");
+                UnregisterFileAssociation(".fbx");
                 UnregisterFileAssociation(".obj");
                 UnregisterDirectoryAssociation("HocotateToolkitPack");
                 UnregisterDirectoryAssociation("HocotateToolkitGcRebuild");
@@ -451,7 +477,6 @@ namespace RARCToolkit
                 return 1;
             }
 
-            WaitForKeyIfInteractive();
             return 0;
         }
 
@@ -635,6 +660,7 @@ namespace RARCToolkit
             Console.WriteLine("  --bmd2fbx   MeltyTool               MeltyPlayer");
             Console.WriteLine("  --bmd2obj   obj2grid                RenolY2");
             Console.WriteLine("  --dae2bmd   SuperBMD_2.4.2.1_RC     RenolY2");
+            Console.WriteLine("  --fbx2bmd   BMD_analysis + preset   RenolY2");
             Console.WriteLine("  --obj2grid  obj2grid                RenolY2");
             Console.WriteLine();
             Console.WriteLine("Usage:");
@@ -647,6 +673,7 @@ namespace RARCToolkit
             Console.WriteLine("    .wbfs            -> Extract Wii disc");
             Console.WriteLine("    .bmd / .bdl      -> Convert to DAE + FBX + OBJ (batch)");
             Console.WriteLine("    .dae             -> Convert to BMD");
+            Console.WriteLine("    .fbx             -> Convert to BMD");
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
             Console.WriteLine();
             Console.WriteLine("  [Command Line]");
@@ -662,8 +689,9 @@ namespace RARCToolkit
             Console.WriteLine("    --iso2wbfs  <input.iso>   [output.wbfs]");
             Console.WriteLine("    --bmd2dae  <.bmd>         [output.dae]");
             Console.WriteLine("    --dae2bmd  <.dae>         [output.bmd]  [--mat mat.json] [--texheader tex.json]");
-            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   * requires FBX_analysis.exe");
+            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
+            Console.WriteLine("    --fbx2bmd  <.fbx>         [output.bmd]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine();
             Console.WriteLine("  [GC Disc Notes]");
@@ -684,8 +712,9 @@ namespace RARCToolkit
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
             Console.WriteLine("    resource\\DiscExtract.exe  -> used by --gcextract / --wiiextract");
             Console.WriteLine("    resource\\DiscRebuild.exe  -> used by --gcrebuild / --wiirebuild / --iso2wbfs");
-            Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj");
+            Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj / --fbx2bmd");
             Console.WriteLine("    resource\\FBX_analysis.exe  -> used by --bmd2fbx");
+            Console.WriteLine("    resource\\simpleshading.json -> used by --fbx2bmd");
         }
     }
 }
