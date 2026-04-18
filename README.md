@@ -9,7 +9,7 @@
 
 ## Download
 
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.23a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.12a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://www.dropbox.com/scl/fi/9kg9ex6lqg7ecshvg7a3h/Hocotate_Toolkit_v1.23a.zip?rlkey=4ndr930do5gsc7quc7609c4bv&st=8cn6nms2&dl=0">
+<a href="https://www.dropbox.com/scl/fi/rbeafv64oghsc0r7hpca5/Hocotate_Toolkit_v1.12a.zip?rlkey=f4736wms8ugrdxzx8l0wkj86f&st=tljk1z95&dl=0">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -50,20 +50,19 @@ The following applications and reference authors were consulted for implementati
 | `--bmd2fbx` | `MeltyTool` | `MeltyPlayer` |
 | `--bmd2obj` | `obj2grid` | `RenolY2` |
 | `--dae2bmd` | `SuperBMD_2.4.2.1_RC` | `RenolY2` |
-| `--fbx2bmd` | `BMD_analysis` + `simpleshading preset` | `RenolY2` |
 | `--obj2grid` | `obj2grid` | `RenolY2` |
 
 
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
-**12種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
+**11種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
 
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
-It supports **12 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+It supports **11 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
 Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
@@ -80,7 +79,6 @@ Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bm
 | `--bmd2fbx` | `.bmd` / `.bdl` を `.fbx` に変換 (FBX_analysis使用)/ Convert `.bmd` / `.bdl` to `.fbx` (via FBX_analysis)   |
 | `--bmd2obj` | `.bmd` / `.bdl` を `.obj` + `.mtl` に変換 (BMD_analysis使用)/ Convert `.bmd` / `.bdl` to `.obj` + `.mtl` (via BMD_analysis) |
 | `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) / Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
-| `--fbx2bmd` | `.fbx` を `.bmd` に変換 (`BMD_analysis.exe` + `simpleshading.json` 使用) / Convert `.fbx` to `.bmd` (via `BMD_analysis.exe` + `simpleshading.json`) |
 | `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 /  Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin`  |
 
 
@@ -97,8 +95,6 @@ Place the following files together in one folder.
 `Hocotate_Toolkit.exe` is a self-contained single-file binary; no .NET installation is required.  
 The `resource\` folder must stay in the same directory as the exe.
 For the GameCube / Wii disc extraction feature, the GameCube / Wii disc rebuild feature, and `--iso2wbfs`, also place `DiscExtract.exe` and `DiscRebuild.exe` inside `resource\`.
-For `--fbx2bmd`, also place `simpleshading.json` inside `resource\`.
-`BMD_analysis.exe` is used by `--bmd2dae`, `--dae2bmd`, `--bmd2obj`, and `--fbx2bmd`.
 
 ```
 Hocotate_Toolkit.exe
@@ -117,7 +113,6 @@ resource\
     OpenTK.dll
     EndianBinaryStreams.dll
     GameFormatReader.dll
-    simpleshading.json
     (+ other required DLLs)
 ```
 
@@ -142,10 +137,9 @@ Output is placed in a subfolder named after the input file, at the same director
 | `.wbfs` | `--wiiextract` (Wii ディスク全体抽出 / full Wii disc extract) |
 | `.bmd` / `.bdl` | bmd2dae + bmd2fbx + bmd2obj (3種一括 / all three) |
 | `.dae` | `--dae2bmd` |
-| `.fbx` | `--fbx2bmd` |
 | `.obj` | `--obj2grid` |
 
-`--register` を実行すると、`.iso` の右クリックメニューに `Convert ISO to WBFS` が追加され、`.fbx` には `FBX to BMD`、フォルダ右クリックには `Pack to SZS` / `Rebuild GC Disc` / `Rebuild Wii Disc` が個別に追加されます。
+`--register` を実行すると、`.iso` の右クリックメニューに `Convert ISO to WBFS` が追加され、フォルダ右クリックには `Pack to SZS` / `Rebuild GC Disc` / `Rebuild Wii Disc` が個別に追加されます。
 
 ### Command Line / コマンドライン
 <img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/ed6b1850-b27c-4907-97b3-b96f29b6d657" />
@@ -194,15 +188,11 @@ Hocotate_Toolkit.exe --bmd2obj "C:\path\to\model.bmd"
 :: Collada を BMD に変換 / Convert Collada to BMD
 Hocotate_Toolkit.exe --dae2bmd "C:\path\to\model.dae" "C:\path\to\out.bmd" --mat "C:\path\to\materials.json"
 
-:: FBX を BMD に変換 / Convert FBX to BMD
-Hocotate_Toolkit.exe --fbx2bmd "C:\path\to\model.fbx"
-
 :: OBJ コリジョンメッシュを grid.bin に変換 / Convert OBJ collision mesh to grid.bin
 Hocotate_Toolkit.exe --obj2grid "C:\path\to\collision.obj"
 ```
 
 ### GameCube Round-Trip Notes
-<img width="500" height="350" alt="HokotateToolKit2" src="https://github.com/user-attachments/assets/006d1a4e-ca04-423c-9d29-f8a5cede1394" />
 
 実ロムを用いた往復検証では，再構築した `.iso` が Dolphin で認識され，再抽出した `files` の内容も元と一致しました．  
 ただし，再構築後のイメージは元ROMと完全なバイナリ一致にはなりません．
@@ -219,21 +209,17 @@ be byte-identical to the source disc.
 
 ### Wii Round-Trip Notes
 
-<img width="500" height="300" alt="HokotateToolKit3" src="https://github.com/user-attachments/assets/79bf8bdd-37af-4ed5-bd63-d5843edbf08a" />
-
 Wii 再構築では `ticket.bin`・`tmd.bin`・`cert.bin`・`disc\header.bin`・`disc\region.bin` を使ってゲームパーティションを再構成し，出力拡張子に応じて `.iso` または `.wbfs` を生成します．  
-
-----------------------------------------------------------------------------------------------------
 Wii rebuild uses `ticket.bin`, `tmd.bin`, `cert.bin`, `disc\header.bin`, and `disc\region.bin` to reconstruct the game partition and outputs either `.iso` or `.wbfs` depending on the requested extension.
 
 ### Context Menu / 右クリックメニュー連携
 
-`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.fbx`・`.obj` とフォルダに用途別の右クリック項目が追加されます．
+`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.obj` とフォルダに用途別の右クリック項目が追加されます．
 管理者権限は不要です（ユーザー単位のレジストリ HKCU に登録されます）．
 
 ----------------------------------------------------------------------------------------------------
 
-Run `Register_ContextMenu.bat` to add purpose-specific Hocotate Toolkit entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.wbfs`, `.bmd`, `.bdl`, `.dae`, `.fbx`, `.obj`) and folders.
+Run `Register_ContextMenu.bat` to add purpose-specific Hocotate Toolkit entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.wbfs`, `.bmd`, `.bdl`, `.dae`, `.obj`) and folders.
 No administrator rights are required — entries are registered per-user (HKCU).
 
 ```bat

@@ -20,7 +20,6 @@ namespace RARCToolkit
             @"/ __  / (_) | (_| (_) | || (_| | ||  __/  / / | (_) | (_) | | |   <| | |_ ",
             @"\/ /_/ \___/ \___\___/ \__\__,_|\__\___|  \/   \___/ \___/|_| |_|\_\_|\__|",
             @"Created by : C2H4",
-            @"Version : 1.23a",
         };
 
         static void PrintBanner()
@@ -33,21 +32,6 @@ namespace RARCToolkit
 
         static int Main(string[] args)
         {
-            int exitCode = 1;
-
-            try
-            {
-                exitCode = RunMain(args);
-                return exitCode;
-            }
-            finally
-            {
-                WaitForKeyIfInteractive();
-            }
-        }
-
-        static int RunMain(string[] args)
-        {
             if (args.Length == 0)
             {
                 PrintBanner();
@@ -58,6 +42,8 @@ namespace RARCToolkit
                 Console.WriteLine("  1. Drag & drop a file or folder directly onto this exe.");
                 Console.WriteLine("  2. Call from a batch file or program with arguments.");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
+                Console.WriteLine();
+                WaitForKeyIfInteractive();
                 return 1;
             }
 
@@ -101,7 +87,6 @@ namespace RARCToolkit
                     "dae2bmd"  => DoDae2Bmd(args),
                     "bmd2fbx"  => DoBmd2Fbx(input, OptArg(args, 2)),
                     "bmd2obj"  => DoBmd2Obj(input, OptArg(args, 2)),
-                    "fbx2bmd"  => DoFbx2Bmd(input, OptArg(args, 2)),
                     "obj2grid" => DoObj2Grid(args),
                     _ => UnknownMode(args[0]),
                 };
@@ -117,6 +102,7 @@ namespace RARCToolkit
 
         static int AutoDetect(string path)
         {
+            path = NormalizePath(path);
             PrintBanner();
             Console.WriteLine($"Input: {path}");
             Console.WriteLine();
@@ -151,7 +137,6 @@ namespace RARCToolkit
                         ".iso" or ".gcm" or ".wbfs" => RunDiscExtract(path),
                         ".bmd" or ".bdl" => RunBmdAll(path),
                         ".dae"           => RunDae2Bmd(path),
-                        ".fbx"           => RunFbx2Bmd(path),
                         ".obj"           => RunObj2Grid(path),
                         _                => UnknownDrop(ext),
                     };
@@ -171,6 +156,7 @@ namespace RARCToolkit
             Console.WriteLine();
             Console.WriteLine("──────────────────────────────────────────────────────────────");
             Console.WriteLine(result == 0 ? "Done." : "Completed with errors.");
+            WaitForKeyIfInteractive();
             return result;
         }
 
@@ -221,16 +207,10 @@ namespace RARCToolkit
             return DoObj2Grid(new[] { "--obj2grid", path });
         }
 
-        static int RunFbx2Bmd(string path)
-        {
-            Console.WriteLine("[FBX] -> BMD conversion");
-            return DoFbx2Bmd(path, null);
-        }
-
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .obj");
             return 1;
         }
 
@@ -258,9 +238,9 @@ namespace RARCToolkit
 
         static int DoPack(string folderPath, string? outputPath)
         {
-            folderPath = folderPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            folderPath = NormalizePath(folderPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             RequireDirectory(folderPath);
-            outputPath ??= SiblingFile(folderPath, ".arc");
+            outputPath = NormalizeOutputPath(outputPath) ?? SiblingFile(folderPath, ".arc");
             Console.WriteLine($"Pack: {folderPath} -> {outputPath}");
             PackFolder(folderPath, outputPath);
             Console.WriteLine("Done.");
@@ -269,9 +249,9 @@ namespace RARCToolkit
 
         static int DoSzs(string folderPath, string? outputPath)
         {
-            folderPath = folderPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            folderPath = NormalizePath(folderPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             RequireDirectory(folderPath);
-            outputPath ??= SiblingFile(folderPath, ".szs");
+            outputPath = NormalizeOutputPath(outputPath) ?? SiblingFile(folderPath, ".szs");
             Console.WriteLine($"SZS pack: {folderPath} -> {outputPath}");
             PackFolder(folderPath, outputPath);
             Console.WriteLine("Done.");
@@ -280,8 +260,9 @@ namespace RARCToolkit
 
         static int DoExtract(string inputPath, string? outputDir)
         {
+            inputPath = NormalizePath(inputPath);
             RequireFile(inputPath);
-            outputDir ??= Path.Combine(
+            outputDir = NormalizeOutputPath(outputDir) ?? Path.Combine(
                 Path.GetDirectoryName(inputPath) ?? ".",
                 Path.GetFileNameWithoutExtension(inputPath));
             Console.WriteLine($"Extract: {inputPath} -> {outputDir}");
@@ -291,49 +272,63 @@ namespace RARCToolkit
 
         static int DoGcExtract(string inputPath, string? outputDir)
         {
+            inputPath = NormalizePath(inputPath);
             RequireFile(inputPath);
+            outputDir = NormalizeOutputPath(outputDir);
             Console.WriteLine($"GC extract: {inputPath} -> {outputDir ?? "(auto)"}");
             return DiscExtractConvert.ExtractGameCubeDisc(inputPath, outputDir);
         }
 
         static int DoWiiExtract(string inputPath, string? outputDir)
         {
+            inputPath = NormalizePath(inputPath);
             RequireFile(inputPath);
+            outputDir = NormalizeOutputPath(outputDir);
             Console.WriteLine($"Wii extract: {inputPath} -> {outputDir ?? "(auto)"}");
             return DiscExtractConvert.ExtractWiiDisc(inputPath, outputDir);
         }
 
         static int DoDiscExtract(string inputPath, string? outputDir)
         {
+            inputPath = NormalizePath(inputPath);
             RequireFile(inputPath);
+            outputDir = NormalizeOutputPath(outputDir);
             Console.WriteLine($"Disc extract: {inputPath} -> {outputDir ?? "(auto)"}");
             return DiscExtractConvert.ExtractDiscImage(inputPath, outputDir);
         }
 
         static int DoGcRebuild(string inputFolder, string? outputPath)
         {
+            inputFolder = NormalizePath(inputFolder);
             RequireDirectory(inputFolder);
+            outputPath = NormalizeOutputPath(outputPath);
             Console.WriteLine($"GC rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
             return DiscRebuildConvert.RebuildGameCubeDisc(inputFolder, outputPath);
         }
 
         static int DoWiiRebuild(string inputFolder, string? outputPath)
         {
+            inputFolder = NormalizePath(inputFolder);
             RequireDirectory(inputFolder);
+            outputPath = NormalizeOutputPath(outputPath);
             Console.WriteLine($"Wii rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
             return DiscRebuildConvert.RebuildWiiDisc(inputFolder, outputPath);
         }
 
         static int DoIsoToWbfs(string inputIso, string? outputPath)
         {
+            inputIso = NormalizePath(inputIso);
             RequireFile(inputIso);
+            outputPath = NormalizeOutputPath(outputPath);
             Console.WriteLine($"ISO to WBFS: {inputIso} -> {outputPath ?? "(auto)"}");
             return DiscRebuildConvert.ConvertIsoToWbfs(inputIso, outputPath);
         }
 
         static int DoDiscRebuild(string inputFolder, string? outputPath)
         {
+            inputFolder = NormalizePath(inputFolder);
             RequireDirectory(inputFolder);
+            outputPath = NormalizeOutputPath(outputPath);
             Console.WriteLine($"Disc rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
             return DiscRebuildConvert.RebuildDisc(inputFolder, outputPath);
         }
@@ -342,6 +337,7 @@ namespace RARCToolkit
 
         static int DoBmd2Dae(string inputBmd, string? outputDae)
         {
+            inputBmd = NormalizePath(inputBmd);
             RequireFile(inputBmd);
             if (string.IsNullOrEmpty(outputDae))
             {
@@ -351,26 +347,31 @@ namespace RARCToolkit
                 Directory.CreateDirectory(outFolder);
                 outputDae        = Path.Combine(outFolder, name + ".dae");
             }
+            else outputDae = NormalizeOutputPath(outputDae);
             return SuperBMDConvert.Bmd2Dae(inputBmd, outputDae);
         }
 
         static int DoDae2Bmd(string[] args)
         {
-            RequireFile(args[1]);
-            string? output = OptArg(args, 2);
-            string? mat    = GetFlag(args, "--mat");
-            string? texhdr = GetFlag(args, "--texheader");
-            return SuperBMDConvert.Dae2Bmd(args[1], output, mat, texhdr);
+            string inputDae = NormalizePath(args[1]);
+            RequireFile(inputDae);
+            string? output = NormalizeOutputPath(OptArg(args, 2));
+            string? mat    = NormalizePathOrNull(GetFlag(args, "--mat"));
+            string? texhdr = NormalizePathOrNull(GetFlag(args, "--texheader"));
+            return SuperBMDConvert.Dae2Bmd(inputDae, output, mat, texhdr);
         }
 
         static int DoBmd2Fbx(string inputBmd, string? outputDir)
         {
+            inputBmd = NormalizePath(inputBmd);
             RequireFile(inputBmd);
+            outputDir = NormalizeOutputPath(outputDir);
             return SuperBMDConvert.Bmd2Fbx(inputBmd, outputDir);
         }
 
         static int DoBmd2Obj(string inputBmd, string? outputObj)
         {
+            inputBmd = NormalizePath(inputBmd);
             RequireFile(inputBmd);
             if (string.IsNullOrEmpty(outputObj))
             {
@@ -380,24 +381,19 @@ namespace RARCToolkit
                 Directory.CreateDirectory(outFolder);
                 outputObj        = Path.Combine(outFolder, name + ".obj");
             }
+            else outputObj = NormalizeOutputPath(outputObj);
             return SuperBMDConvert.Bmd2Obj(inputBmd, outputObj);
-        }
-
-        static int DoFbx2Bmd(string inputFbx, string? outputBmd)
-        {
-            RequireFile(inputFbx);
-            return SuperBMDConvert.Fbx2Bmd(inputFbx, outputBmd);
         }
 
         // ── obj2grid ─────────────────────────────────────────────────────────
 
         static int DoObj2Grid(string[] args)
         {
-            string inputObj = args[1];
+            string inputObj = NormalizePath(args[1]);
             RequireFile(inputObj);
 
-            string? outputGrid    = OptArg(args, 2);
-            string? outputMapcode = OptArg(args, 3);
+            string? outputGrid    = NormalizeOutputPath(OptArg(args, 2));
+            string? outputMapcode = NormalizeOutputPath(OptArg(args, 3));
             int     cellSize      = int.TryParse(GetFlag(args, "--cell_size"), out int cs) ? cs : 100;
             bool    flipYZ        = args.Contains("--flipyz");
 
@@ -414,6 +410,15 @@ namespace RARCToolkit
             new Obj2Grid().Convert(inputObj, outputGrid, outputMapcode, cellSize, flipYZ);
             return 0;
         }
+
+        static string NormalizePath(string path)
+            => Path.GetFullPath(path);
+
+        static string? NormalizePathOrNull(string? path)
+            => string.IsNullOrWhiteSpace(path) ? null : NormalizePath(path);
+
+        static string? NormalizeOutputPath(string? path)
+            => string.IsNullOrWhiteSpace(path) ? null : NormalizePath(path);
 
         // ── Context menu register / unregister ───────────────────────────────
 
@@ -433,7 +438,6 @@ namespace RARCToolkit
                 RegisterFileAssociation(exePath, ".bmd", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".bdl", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".dae", "Hocotate Toolkit - DAE to BMD", $"\"{exePath}\" \"%1\"");
-                RegisterFileAssociation(exePath, ".fbx", "Hocotate Toolkit - FBX to BMD", $"\"{exePath}\" --fbx2bmd \"%1\"");
                 RegisterFileAssociation(exePath, ".obj", "Hocotate Toolkit - OBJ to grid.bin", $"\"{exePath}\" \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitPack", "Hocotate Toolkit - Pack to SZS", $"\"{exePath}\" --szs \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitGcRebuild", "Hocotate Toolkit - Rebuild GC Disc", $"\"{exePath}\" --gcrebuild \"%1\"");
@@ -447,6 +451,7 @@ namespace RARCToolkit
                 return 1;
             }
 
+            WaitForKeyIfInteractive();
             return 0;
         }
 
@@ -463,7 +468,6 @@ namespace RARCToolkit
                 UnregisterFileAssociation(".bmd");
                 UnregisterFileAssociation(".bdl");
                 UnregisterFileAssociation(".dae");
-                UnregisterFileAssociation(".fbx");
                 UnregisterFileAssociation(".obj");
                 UnregisterDirectoryAssociation("HocotateToolkitPack");
                 UnregisterDirectoryAssociation("HocotateToolkitGcRebuild");
@@ -477,6 +481,7 @@ namespace RARCToolkit
                 return 1;
             }
 
+            WaitForKeyIfInteractive();
             return 0;
         }
 
@@ -544,16 +549,19 @@ namespace RARCToolkit
 
         static void WaitForKeyIfInteractive()
         {
-            if (Console.IsInputRedirected || Console.IsOutputRedirected)
-                return;
-
             try
             {
+                if (!Environment.UserInteractive ||
+                    Console.IsInputRedirected ||
+                    Console.IsOutputRedirected ||
+                    Console.IsErrorRedirected)
+                    return;
+
                 Console.WriteLine();
                 Console.WriteLine("Press any key to close...");
                 Console.ReadKey();
             }
-            catch (InvalidOperationException)
+            catch
             {
             }
         }
@@ -660,7 +668,6 @@ namespace RARCToolkit
             Console.WriteLine("  --bmd2fbx   MeltyTool               MeltyPlayer");
             Console.WriteLine("  --bmd2obj   obj2grid                RenolY2");
             Console.WriteLine("  --dae2bmd   SuperBMD_2.4.2.1_RC     RenolY2");
-            Console.WriteLine("  --fbx2bmd   BMD_analysis + preset   RenolY2");
             Console.WriteLine("  --obj2grid  obj2grid                RenolY2");
             Console.WriteLine();
             Console.WriteLine("Usage:");
@@ -673,7 +680,6 @@ namespace RARCToolkit
             Console.WriteLine("    .wbfs            -> Extract Wii disc");
             Console.WriteLine("    .bmd / .bdl      -> Convert to DAE + FBX + OBJ (batch)");
             Console.WriteLine("    .dae             -> Convert to BMD");
-            Console.WriteLine("    .fbx             -> Convert to BMD");
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
             Console.WriteLine();
             Console.WriteLine("  [Command Line]");
@@ -689,9 +695,8 @@ namespace RARCToolkit
             Console.WriteLine("    --iso2wbfs  <input.iso>   [output.wbfs]");
             Console.WriteLine("    --bmd2dae  <.bmd>         [output.dae]");
             Console.WriteLine("    --dae2bmd  <.dae>         [output.bmd]  [--mat mat.json] [--texheader tex.json]");
-            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]");
+            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   * requires FBX_analysis.exe");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
-            Console.WriteLine("    --fbx2bmd  <.fbx>         [output.bmd]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine();
             Console.WriteLine("  [GC Disc Notes]");
@@ -712,9 +717,8 @@ namespace RARCToolkit
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
             Console.WriteLine("    resource\\DiscExtract.exe  -> used by --gcextract / --wiiextract");
             Console.WriteLine("    resource\\DiscRebuild.exe  -> used by --gcrebuild / --wiirebuild / --iso2wbfs");
-            Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj / --fbx2bmd");
+            Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj");
             Console.WriteLine("    resource\\FBX_analysis.exe  -> used by --bmd2fbx");
-            Console.WriteLine("    resource\\simpleshading.json -> used by --fbx2bmd");
         }
     }
 }

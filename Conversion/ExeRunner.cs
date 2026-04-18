@@ -20,14 +20,11 @@ namespace RARCToolkit.Conversion
         public static string FindExe(string exeName)
         {
             string baseDir = AppContext.BaseDirectory;
-
-            // 1. resource\ サブフォルダを優先検索
-            string resourceCandidate = Path.Combine(baseDir, "resource", exeName);
-            if (File.Exists(resourceCandidate)) return resourceCandidate;
-
-            // 2. 同じフォルダ直下
-            string directCandidate = Path.Combine(baseDir, exeName);
-            if (File.Exists(directCandidate)) return directCandidate;
+            foreach (string candidate in EnumerateCandidates(baseDir, exeName))
+            {
+                if (File.Exists(candidate))
+                    return candidate;
+            }
 
             throw new FileNotFoundException(
                 $"'{exeName}' が見つかりません。\n" +
@@ -51,7 +48,7 @@ namespace RARCToolkit.Conversion
             {
                 FileName               = exePath,
                 Arguments              = argString,
-                WorkingDirectory       = workingDir ?? Path.GetDirectoryName(exePath) ?? ".",
+                WorkingDirectory       = workingDir ?? Environment.CurrentDirectory,
                 UseShellExecute        = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError  = true,
@@ -77,6 +74,32 @@ namespace RARCToolkit.Conversion
                 a.Contains(' ') || a.Contains('"') || a.Contains('\t')
                     ? $"\"{a.Replace("\"", "\\\"")}\""
                     : a));
+        }
+
+        private static IEnumerable<string> EnumerateCandidates(string baseDir, string exeName)
+        {
+            HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string directory in EnumerateBaseDirectories(baseDir))
+            {
+                string resourceCandidate = Path.Combine(directory, "resource", exeName);
+                if (seen.Add(resourceCandidate))
+                    yield return resourceCandidate;
+
+                string directCandidate = Path.Combine(directory, exeName);
+                if (seen.Add(directCandidate))
+                    yield return directCandidate;
+            }
+        }
+
+        private static IEnumerable<string> EnumerateBaseDirectories(string baseDir)
+        {
+            DirectoryInfo? current = new(baseDir);
+            while (current is not null)
+            {
+                yield return current.FullName;
+                current = current.Parent;
+            }
         }
     }
 }

@@ -10,11 +10,13 @@ namespace RARCToolkit.Conversion
             if (!File.Exists(inputPath))
                 throw new FileNotFoundException($"File not found: {inputPath}");
 
+            inputPath = Path.GetFullPath(inputPath);
             string exePath = ExeRunner.FindExe("DiscExtract.exe");
 
             outputDir ??= Path.Combine(
                 Path.GetDirectoryName(inputPath) ?? ".",
                 Path.GetFileNameWithoutExtension(inputPath));
+            outputDir = Path.GetFullPath(outputDir);
 
             return ExeRunner.Run(exePath, new[] { "--extract", inputPath, outputDir });
         }

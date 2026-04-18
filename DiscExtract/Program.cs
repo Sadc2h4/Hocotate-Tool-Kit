@@ -35,6 +35,9 @@ internal static class Program
     private const int WiiBlockDataSize = 0x7C00;
     private const int WiiBlockTotalSize = WiiBlockHeaderSize + WiiBlockDataSize;
 
+    private static readonly Encoding DiscNameEncoding = CreateDiscNameEncoding();
+    private static readonly char[] InvalidPathChars = Path.GetInvalidFileNameChars();
+
     private static readonly byte[] RetailCommonKey =
     {
         0xEB, 0xE4, 0x2A, 0x22, 0x5E, 0x85, 0x93, 0xE4, 0x48, 0xD9, 0xC5, 0x45, 0x73, 0x81, 0xAA, 0xF7
@@ -205,7 +208,7 @@ internal static class Program
         while (index < endIndex)
         {
             FstEntry entry = entries[index];
-            string outputPath = Path.Combine(currentOutputDir, entry.Name);
+            string outputPath = Path.Combine(currentOutputDir, SanitizePathSegment(entry.Name));
             if (entry.IsDirectory)
             {
                 Console.WriteLine($"[DIR ] {GetDisplayPath(outputPath)}");
@@ -305,10 +308,31 @@ internal static class Program
         int end = offset;
         while (end < data.Length && data[end] != 0)
             end++;
-        return Encoding.ASCII.GetString(data, offset, end - offset);
+        return DiscNameEncoding.GetString(data, offset, end - offset);
     }
 
     private static string GetDisplayPath(string outputPath) => outputPath.Replace(Path.DirectorySeparatorChar, '/');
+
+    private static string SanitizePathSegment(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "_";
+
+        string sanitized = string.Join("_", name.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        sanitized = sanitized.TrimEnd('.', ' ');
+
+        StringBuilder builder = new(sanitized.Length);
+        foreach (char ch in sanitized)
+            builder.Append(Array.IndexOf(InvalidPathChars, ch) >= 0 ? '_' : ch);
+
+        return builder.Length == 0 ? "_" : builder.ToString();
+    }
+
+    private static Encoding CreateDiscNameEncoding()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        return Encoding.GetEncoding(932);
+    }
 
     private static void RequireFile(string path)
     {

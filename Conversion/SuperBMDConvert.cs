@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace RARCToolkit.Conversion
 {
@@ -12,13 +11,9 @@ namespace RARCToolkit.Conversion
     public static class SuperBMDConvert
     {
         private static string? _superBmdExe;
-        private static string? _simpleShadingPreset;
 
         private static string GetSuperBmdExe()
             => _superBmdExe ??= ExeRunner.FindExe("BMD_analysis.exe");
-
-        private static string GetSimpleShadingPreset()
-            => _simpleShadingPreset ??= FindSuperBmdResource("simpleshading.json");
 
         // ─── BMD → DAE ──────────────────────────────────────────────
 
@@ -31,6 +26,9 @@ namespace RARCToolkit.Conversion
         public static int Bmd2Dae(string inputBmd, string? outputDae)
         {
             ValidateInput(inputBmd, ".bmd", ".bdl");
+            inputBmd = Path.GetFullPath(inputBmd);
+            if (!string.IsNullOrEmpty(outputDae))
+                outputDae = Path.GetFullPath(outputDae);
 
             var args = new List<string> { inputBmd };
             if (!string.IsNullOrEmpty(outputDae))
@@ -55,6 +53,7 @@ namespace RARCToolkit.Conversion
                                    string? materialsJson, string? texHeaderJson)
         {
             ValidateInput(inputDae, ".dae");
+            inputDae = Path.GetFullPath(inputDae);
 
             if (string.IsNullOrEmpty(outputBmd))
             {
@@ -62,6 +61,11 @@ namespace RARCToolkit.Conversion
                 string name = Path.GetFileNameWithoutExtension(inputDae);
                 outputBmd   = Path.Combine(dir, name + ".bmd");
             }
+            outputBmd = Path.GetFullPath(outputBmd);
+            if (!string.IsNullOrEmpty(materialsJson))
+                materialsJson = Path.GetFullPath(materialsJson);
+            if (!string.IsNullOrEmpty(texHeaderJson))
+                texHeaderJson = Path.GetFullPath(texHeaderJson);
 
             var args = new List<string> { inputDae, outputBmd };
             if (!string.IsNullOrEmpty(materialsJson))
@@ -91,6 +95,9 @@ namespace RARCToolkit.Conversion
         public static int Bmd2Obj(string inputBmd, string? outputObj)
         {
             ValidateInput(inputBmd, ".bmd", ".bdl");
+            inputBmd = Path.GetFullPath(inputBmd);
+            if (!string.IsNullOrEmpty(outputObj))
+                outputObj = Path.GetFullPath(outputObj);
 
             var args = new List<string> { inputBmd };
             if (!string.IsNullOrEmpty(outputObj))
@@ -114,6 +121,7 @@ namespace RARCToolkit.Conversion
         public static int Bmd2Fbx(string inputBmd, string? outputDir)
         {
             ValidateInput(inputBmd, ".bmd", ".bdl");
+            inputBmd = Path.GetFullPath(inputBmd);
             string bmd2fbxExe = ExeRunner.FindExe("FBX_analysis.exe");
 
             if (string.IsNullOrEmpty(outputDir))
@@ -122,6 +130,7 @@ namespace RARCToolkit.Conversion
                 string name = Path.GetFileNameWithoutExtension(inputBmd);
                 outputDir   = Path.Combine(dir, name);
             }
+            outputDir = Path.GetFullPath(outputDir);
             Directory.CreateDirectory(outputDir);
 
             var args = new List<string>
@@ -135,86 +144,6 @@ namespace RARCToolkit.Conversion
             Console.WriteLine($"  BMD → FBX: {Path.GetFileName(inputBmd)} → {outputDir}");
             int code = ExeRunner.Run(bmd2fbxExe, args, Path.GetDirectoryName(bmd2fbxExe));
             return code;
-        }
-
-        // ─── FBX → BMD ──────────────────────────────────────────────
-
-        /// <summary>
-        /// FBX ファイルを BMD に変換します。
-        /// resource\BMD_analysis.exe と simpleshading preset が必要です。
-        /// </summary>
-        /// <param name="inputFbx">入力 .fbx ファイルパス</param>
-        /// <param name="outputBmd">出力 .bmd パス（省略時は入力と同じフォルダ）</param>
-        /// <returns>成功なら 0</returns>
-        public static int Fbx2Bmd(string inputFbx, string? outputBmd)
-        {
-            ValidateInput(inputFbx, ".fbx");
-            inputFbx = Path.GetFullPath(inputFbx);
-
-            if (string.IsNullOrEmpty(outputBmd))
-            {
-                string dir = Path.GetDirectoryName(inputFbx) ?? ".";
-                string name = Path.GetFileNameWithoutExtension(inputFbx);
-                outputBmd = Path.Combine(dir, name + ".bmd");
-            }
-            else
-            {
-                outputBmd = Path.GetFullPath(outputBmd);
-            }
-
-            string exePath = GetSuperBmdExe();
-            string presetPath = GetSimpleShadingPreset();
-            string? preparedInput = null;
-            string actualInput = inputFbx;
-
-            try
-            {
-                preparedInput = FbxSkeletonRootPreprocessor.PrepareInputForSuperBmd(inputFbx);
-                if (!string.IsNullOrEmpty(preparedInput))
-                {
-                    actualInput = preparedInput;
-                    Console.WriteLine("  Added temporary skeleton_root wrapper for rigged FBX input.");
-                }
-
-                var args = new List<string> { actualInput, outputBmd, "--mat", presetPath, "--rotate" };
-
-                Console.WriteLine($"  FBX → BMD: {Path.GetFileName(inputFbx)}");
-                int code = ExeRunner.Run(exePath, args, Path.GetDirectoryName(exePath));
-                return code;
-            }
-            finally
-            {
-                if (!string.IsNullOrEmpty(preparedInput))
-                {
-                    try
-                    {
-                        File.Delete(preparedInput);
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-        }
-
-        // ─── ヘルパー ────────────────────────────────────────────────
-
-        private static string FindSuperBmdResource(params string[] relativeParts)
-        {
-            string baseDir = AppContext.BaseDirectory;
-            string resourcePath = Path.Combine(new[] { baseDir, "resource" }.Concat(relativeParts).ToArray());
-            if (File.Exists(resourcePath))
-                return resourcePath;
-
-            string directPath = Path.Combine(new[] { baseDir }.Concat(relativeParts).ToArray());
-            if (File.Exists(directPath))
-                return directPath;
-
-            throw new FileNotFoundException(
-                $"'{Path.Combine(relativeParts)}' が見つかりません。\n" +
-                $"--fbx2bmd を使うには simpleshading preset を resource\\ に配置してください。\n" +
-                $"例: resource\\simpleshading.json\n" +
-                $"検索元: {baseDir}");
         }
 
         // ─── ヘルパー ────────────────────────────────────────────────

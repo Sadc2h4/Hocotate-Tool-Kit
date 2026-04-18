@@ -10,11 +10,13 @@ namespace RARCToolkit.Conversion
             if (!Directory.Exists(inputFolder))
                 throw new DirectoryNotFoundException($"Folder not found: {inputFolder}");
 
+            inputFolder = Path.GetFullPath(inputFolder);
             string exePath = ExeRunner.FindExe("DiscRebuild.exe");
 
             outputPath ??= Path.Combine(
                 Path.GetDirectoryName(inputFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)) ?? ".",
                 Path.GetFileName(inputFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)) + ".iso");
+            outputPath = Path.GetFullPath(outputPath);
 
             return ExeRunner.Run(exePath, new[] { "--rebuild", inputFolder, outputPath });
         }
@@ -40,11 +42,13 @@ namespace RARCToolkit.Conversion
             if (!File.Exists(inputIso))
                 throw new FileNotFoundException($"File not found: {inputIso}");
 
+            inputIso = Path.GetFullPath(inputIso);
             string exePath = ExeRunner.FindExe("DiscRebuild.exe");
 
             outputPath ??= Path.Combine(
                 Path.GetDirectoryName(inputIso) ?? ".",
                 Path.GetFileNameWithoutExtension(inputIso) + ".wbfs");
+            outputPath = Path.GetFullPath(outputPath);
 
             return ExeRunner.Run(exePath, new[] { "--iso2wbfs", inputIso, outputPath });
         }
