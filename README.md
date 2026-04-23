@@ -296,6 +296,7 @@ The folder context menu now registers these three separate entries:
 `Hocotate Toolkit - Rebuild GC Disc`
 `Hocotate Toolkit - Rebuild Wii Disc`
 
+> [!IMPORTANT]
 > **過去バージョンのメニューが残っている場合 / Removing leftover entries from older versions:**  
 > 以前のバージョンで登録したメニューが右クリックに残り続けている場合は，一度 `Unregister_ContextMenu.bat` を実行して古いエントリをすべて削除してから，改めて `Register_ContextMenu.bat` で再登録してください．  
 > アンレジストレーションはラベル名・アイコンパスを検索して過去バージョンのキー名も含めて網羅的に削除するため，旧バージョンのメニューも正しく除去されます．  
@@ -303,6 +304,7 @@ The folder context menu now registers these three separate entries:
 > If context menu entries from a previous version remain in the right-click menu, run `Unregister_ContextMenu.bat` first to remove all leftover entries, then run `Register_ContextMenu.bat` again to re-register cleanly.  
 > The unregistration searches by label name and icon path, covering old version key names as well, so entries from any prior version are correctly removed.
 
+> [!IMPORTANT]
 > **注意 / Note:** Windows 11 では **"その他のオプションを確認"** をクリックして表示される旧右クリックメニュー内に項目が表示されます．  
 > On Windows 11, the Hocotate Toolkit entries appear under **"Show more options"** (the legacy context menu).
 
