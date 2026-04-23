@@ -21,7 +21,7 @@
     <AssemblyVersion>1.23.0.0</AssemblyVersion>
     <FileVersion>1.23.0.0</FileVersion>
     <Version>1.23.0</Version>
-    <InformationalVersion>1.23b</InformationalVersion>
+    <InformationalVersion>1.23c</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
     <!-- ── ビルド環境の情報（パス・ユーザー名）をバイナリに埋め込まない ── -->
@@ -41,9 +41,18 @@
   <ItemGroup>
     <Compile Remove="DiscExtract\**\*.cs" />
     <Compile Remove="DiscRebuild\**\*.cs" />
+    <Compile Remove="reference_app\**\*.cs" />
+    <Compile Remove="BMD_analysis\**\*.cs" />
+    <Compile Remove="FBX_analysis\**\*.cs" />
     <EmbeddedResource Remove="DiscExtract\**\*" />
     <EmbeddedResource Remove="DiscRebuild\**\*" />
+    <EmbeddedResource Remove="reference_app\**\*" />
+    <EmbeddedResource Remove="BMD_analysis\**\*" />
+    <EmbeddedResource Remove="FBX_analysis\**\*" />
     <None Remove="DiscExtract\**\*" />
     <None Remove="DiscRebuild\**\*" />
+    <None Remove="reference_app\**\*" />
+    <None Remove="BMD_analysis\**\*" />
+    <None Remove="FBX_analysis\**\*" />
   </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@
 
 ## Download
 
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.23b">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.23c">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://www.dropbox.com/scl/fi/ds94s3b6p58j50hdz73mg/Hocotate_Toolkit_v1.23b.zip?rlkey=cs143s921hfl3ezf3l4yog6g2&st=j8yjdu4o&dl=0">
+<a href="https://www.dropbox.com/scl/fi/ds94s3b6p58j50hdz73mg/Hocotate_Toolkit_v1.23c.zip?rlkey=cs143s921hfl3ezf3l4yog6g2&st=j8yjdu4o&dl=0">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -46,24 +46,24 @@ The following applications and reference authors were consulted for implementati
 | `--wiiextract` | `DiscExtract` | `jordan-woyak` |
 | `--wiirebuild` | `DiscRebuild` | `jordan-woyak` |
 | `--iso2wbfs` | `DiscRebuild` | `jordan-woyak` |
-| `--bmd2dae` | `SuperBMD_2.4.2.1_RC` | `RenolY2` |
-| `--bmd2fbx` | `MeltyTool` | `MeltyPlayer` |
-| `--bmd2obj` | `obj2grid` | `RenolY2` |
-| `--dae2bmd` | `SuperBMD_2.4.2.1_RC` | `RenolY2` |
-| `--fbx2bmd` | `BMD_analysis` + `simpleshading preset` | `RenolY2` |
+| `--bmd2dae` | `BMD_analysis v2` | `RenolY2` |
+| `--bmd2fbx` | `FBX_analysis v2` | `MeltyPlayer` |
+| `--bmd2obj` | `BMD_analysis v2` | `RenolY2` |
+| `--dae2bmd` | `BMD_analysis v2` | `RenolY2` |
+| `--fbx2bmd` | `BMD_analysis v2` + `simpleshading preset` | `RenolY2` |
 | `--obj2grid` | `obj2grid` | `RenolY2` |
 
 
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
-**12種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
+**14種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
 
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
-It supports **12 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+It supports **14 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
 Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
@@ -77,10 +77,10 @@ Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bm
 | `--wiirebuild` | `sys` + `files` + Wii メタデータから Wii ディスクを `.iso` / `.wbfs` に再構築 / Rebuild a Wii disc from `sys` + `files` + metadata into `.iso` / `.wbfs` |
 | `--iso2wbfs` | `.iso` を `.wbfs` に変換 / Convert `.iso` to `.wbfs` |
 | `--bmd2dae` | `.bmd` / `.bdl` をCollada形式 `.dae` に変換 (BMD_analysis使用) / Convert `.bmd` / `.bdl` to Collada `.dae` (via BMD_analysis)|
-| `--bmd2fbx` | `.bmd` / `.bdl` を `.fbx` に変換 (FBX_analysis使用)/ Convert `.bmd` / `.bdl` to `.fbx` (via FBX_analysis)   |
+| `--bmd2fbx` | `.bmd` / `.bdl` を ASCII形式 `.fbx` + `.glb` に変換 (FBX_analysis v2使用) / Convert `.bmd` / `.bdl` to ASCII `.fbx` + `.glb` (via FBX_analysis v2) |
 | `--bmd2obj` | `.bmd` / `.bdl` を `.obj` + `.mtl` に変換 (BMD_analysis使用)/ Convert `.bmd` / `.bdl` to `.obj` + `.mtl` (via BMD_analysis) |
 | `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) / Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
-| `--fbx2bmd` | `.fbx` を `.bmd` に変換 (`BMD_analysis.exe` + `simpleshading.json` 使用) / Convert `.fbx` to `.bmd` (via `BMD_analysis.exe` + `simpleshading.json`) |
+| `--fbx2bmd` | `.fbx` を `.bmd` に変換 (`BMD_analysis v2` + `simpleshading.json` 使用) / Convert `.fbx` to `.bmd` (via `BMD_analysis v2` + `simpleshading.json`) |
 | `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 /  Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin`  |
 
 
@@ -192,7 +192,11 @@ Hocotate_Toolkit.exe --bmd2fbx "C:\path\to\model.bmd"
 Hocotate_Toolkit.exe --bmd2obj "C:\path\to\model.bmd"
 
 :: Collada を BMD に変換 / Convert Collada to BMD
-Hocotate_Toolkit.exe --dae2bmd "C:\path\to\model.dae" "C:\path\to\out.bmd" --mat "C:\path\to\materials.json"
+Hocotate_Toolkit.exe --dae2bmd "C:\path\to\model.dae" "C:\path\to\out.bmd" --mat "C:\path\to\model_materials.json" --texheader "C:\path\to\model_tex_headers.json"
+
+:: SuperBMD.exe "%~1" --mat "%~dp1\%~n1_materials.json" --texheader "%~dp1\%~n1_tex_headers.json" と同等の指定例
+:: Example equivalent to SuperBMD.exe "%~1" --mat "%~dp1\%~n1_materials.json" --texheader "%~dp1\%~n1_tex_headers.json"
+Hocotate_Toolkit.exe --dae2bmd "C:\path\to\model.dae" "C:\path\to\out.bmd" --mat "C:\path\to\model_materials.json" --texheader "C:\path\to\model_tex_headers.json"
 
 :: FBX を BMD に変換 / Convert FBX to BMD
 Hocotate_Toolkit.exe --fbx2bmd "C:\path\to\model.fbx"
@@ -226,6 +230,44 @@ Wii 再構築では `ticket.bin`・`tmd.bin`・`cert.bin`・`disc\header.bin`・
 ----------------------------------------------------------------------------------------------------
 Wii rebuild uses `ticket.bin`, `tmd.bin`, `cert.bin`, `disc\header.bin`, and `disc\region.bin` to reconstruct the game partition and outputs either `.iso` or `.wbfs` depending on the requested extension.
 
+### FBX Conversion Notes / FBX 変換について
+
+**`--bmd2fbx` (BMD → FBX)**  
+v1.23c より `FBX_analysis v2`（MeltyTool / Assimp 5.x ベース）に更新されました．
+
+- 出力 FBX の形式が **バイナリから ASCII 形式（FBX 7.5.0）** に変更されました．
+  - ASCII FBX は `--fbx2bmd` で使用する `BMD_analysis v2` 内部の Assimp 3.x と互換性があります．
+- FBX と同時に **`モデル名_gltf.glb`** ファイルも出力されます（Blender 等に直接インポート可能）．
+- FBX 内部に `skeleton_root` ダミーノードが含まれ，`--fbx2bmd` での再変換時にボーン情報が保持されます．
+
+**`--fbx2bmd` (FBX → BMD)**  
+v1.23c より `BMD_analysis v2`（SuperBMD 再ビルド版）に更新されました．
+
+- FBX に `skeleton_root` ノードが存在しない場合，スタティックメッシュ（骨格なし）として変換します．
+- BMD → FBX → BMD の往復変換では，元のファイルよりサイズが増加します（ゲーム内動作への影響はありません）．
+  - UV シームでの頂点分裂（FBX の per-vertex 形式への変換で発生）
+  - 頂点データ精度の変化（固定小数点 → Float32）
+  - トライストリップ効率の差（アルゴリズム再生成のため）
+
+----------------------------------------------------------------------------------------------------
+
+**`--bmd2fbx` (BMD → FBX)**  
+Updated to `FBX_analysis v2` (based on MeltyTool / Assimp 5.x) from v1.23c.
+
+- The FBX output format changed from binary to **ASCII (FBX 7.5.0)**.
+  - ASCII FBX is compatible with Assimp 3.x inside `BMD_analysis v2` used by `--fbx2bmd`.
+- A **`modelname_gltf.glb`** file is also exported alongside the FBX (importable directly in Blender etc.).
+- The FBX includes a `skeleton_root` dummy node so that bone data is preserved when converting back with `--fbx2bmd`.
+
+**`--fbx2bmd` (FBX → BMD)**  
+Updated to `BMD_analysis v2` (rebuilt SuperBMD) from v1.23c.
+
+- If the FBX does not contain a `skeleton_root` node, it is converted as a static mesh (no skeleton).
+- Round-trip BMD → FBX → BMD conversion results in a larger output file than the original (no effect on in-game behavior).
+  - Vertex splitting at UV seams (caused by conversion to FBX's per-vertex attribute format)
+  - Increased vertex data precision (fixed-point → Float32)
+  - Tristrip efficiency differences (algorithmically regenerated strips)
+
 ### Context Menu / 右クリックメニュー連携
 
 `Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.fbx`・`.obj` とフォルダに用途別の右クリック項目が追加されます．
@@ -253,6 +295,13 @@ The folder context menu now registers these three separate entries:
 `Hocotate Toolkit - Pack to SZS`
 `Hocotate Toolkit - Rebuild GC Disc`
 `Hocotate Toolkit - Rebuild Wii Disc`
+
+> **過去バージョンのメニューが残っている場合 / Removing leftover entries from older versions:**  
+> 以前のバージョンで登録したメニューが右クリックに残り続けている場合は，一度 `Unregister_ContextMenu.bat` を実行して古いエントリをすべて削除してから，改めて `Register_ContextMenu.bat` で再登録してください．  
+> アンレジストレーションはラベル名・アイコンパスを検索して過去バージョンのキー名も含めて網羅的に削除するため，旧バージョンのメニューも正しく除去されます．  
+>  
+> If context menu entries from a previous version remain in the right-click menu, run `Unregister_ContextMenu.bat` first to remove all leftover entries, then run `Register_ContextMenu.bat` again to re-register cleanly.  
+> The unregistration searches by label name and icon path, covering old version key names as well, so entries from any prior version are correctly removed.
 
 > **注意 / Note:** Windows 11 では **"その他のオプションを確認"** をクリックして表示される旧右クリックメニュー内に項目が表示されます．  
 > On Windows 11, the Hocotate Toolkit entries appear under **"Show more options"** (the legacy context menu).

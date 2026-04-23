@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 using RARCToolkit.Collision;
 using RARCToolkit.Conversion;
@@ -9,6 +11,7 @@ using RARCToolkit.RARC;
 
 namespace RARCToolkit
 {
+    [SupportedOSPlatform("windows")]
     class Program
     {
         // ── ASCII art banner ─────────────────────────────────────────────────
@@ -25,8 +28,16 @@ namespace RARCToolkit
         static void PrintBanner()
         {
             foreach (var line in Banner) Console.WriteLine(line);
+            Console.WriteLine($"Version    : {GetDisplayVersion()}");
             Console.WriteLine();
         }
+
+        static string GetDisplayVersion()
+            => typeof(Program).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion
+               ?? typeof(Program).Assembly.GetName().Version?.ToString()
+               ?? "unknown";
 
         // ── Entry point ──────────────────────────────────────────────────────
 
@@ -86,6 +97,7 @@ namespace RARCToolkit
                     "bmd2dae"  => DoBmd2Dae(input, OptArg(args, 2)),
                     "dae2bmd"  => DoDae2Bmd(args),
                     "bmd2fbx"  => DoBmd2Fbx(input, OptArg(args, 2)),
+                    "fbx2bmd"  => DoFbx2Bmd(input, OptArg(args, 2)),
                     "bmd2obj"  => DoBmd2Obj(input, OptArg(args, 2)),
                     "obj2grid" => DoObj2Grid(args),
                     _ => UnknownMode(args[0]),
@@ -137,6 +149,7 @@ namespace RARCToolkit
                         ".iso" or ".gcm" or ".wbfs" => RunDiscExtract(path),
                         ".bmd" or ".bdl" => RunBmdAll(path),
                         ".dae"           => RunDae2Bmd(path),
+                        ".fbx"           => RunFbx2Bmd(path),
                         ".obj"           => RunObj2Grid(path),
                         _                => UnknownDrop(ext),
                     };
@@ -201,6 +214,12 @@ namespace RARCToolkit
             return DoDae2Bmd(new[] { "--dae2bmd", path });
         }
 
+        static int RunFbx2Bmd(string path)
+        {
+            Console.WriteLine("[FBX] -> BMD conversion");
+            return DoFbx2Bmd(path, null);
+        }
+
         static int RunObj2Grid(string path)
         {
             Console.WriteLine("[OBJ] -> grid.bin + mapcode.bin");
@@ -210,7 +229,7 @@ namespace RARCToolkit
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .obj");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj");
             return 1;
         }
 
@@ -369,6 +388,14 @@ namespace RARCToolkit
             return SuperBMDConvert.Bmd2Fbx(inputBmd, outputDir);
         }
 
+        static int DoFbx2Bmd(string inputFbx, string? outputBmd)
+        {
+            inputFbx = NormalizePath(inputFbx);
+            RequireFile(inputFbx);
+            outputBmd = NormalizeOutputPath(outputBmd);
+            return SuperBMDConvert.Model2Bmd(inputFbx, outputBmd, FindSiblingOrResource(inputFbx, "simpleshading.json"), null);
+        }
+
         static int DoBmd2Obj(string inputBmd, string? outputObj)
         {
             inputBmd = NormalizePath(inputBmd);
@@ -420,6 +447,33 @@ namespace RARCToolkit
         static string? NormalizeOutputPath(string? path)
             => string.IsNullOrWhiteSpace(path) ? null : NormalizePath(path);
 
+        static string? FindSiblingOrResource(string inputPath, string fileName)
+        {
+            string? dir = Path.GetDirectoryName(inputPath);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                string sibling = Path.Combine(dir, fileName);
+                if (File.Exists(sibling))
+                    return sibling;
+            }
+
+            DirectoryInfo? current = new(AppContext.BaseDirectory);
+            while (current is not null)
+            {
+                string resource = Path.Combine(current.FullName, "resource", fileName);
+                if (File.Exists(resource))
+                    return resource;
+
+                string direct = Path.Combine(current.FullName, fileName);
+                if (File.Exists(direct))
+                    return direct;
+
+                current = current.Parent;
+            }
+
+            return null;
+        }
+
         // ── Context menu register / unregister ───────────────────────────────
 
         static int DoRegister()
@@ -429,6 +483,7 @@ namespace RARCToolkit
 
             try
             {
+                RemoveHocotateContextMenuEntries();
                 RegisterFileAssociation(exePath, ".arc", "Hocotate Toolkit - Extract", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".szs", "Hocotate Toolkit - Extract", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".iso", "Hocotate Toolkit - Extract Disc", $"\"{exePath}\" --discextract \"%1\"");
@@ -438,6 +493,7 @@ namespace RARCToolkit
                 RegisterFileAssociation(exePath, ".bmd", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".bdl", "Hocotate Toolkit - Convert BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".dae", "Hocotate Toolkit - DAE to BMD", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".fbx", "Hocotate Toolkit - FBX to BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".obj", "Hocotate Toolkit - OBJ to grid.bin", $"\"{exePath}\" \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitPack", "Hocotate Toolkit - Pack to SZS", $"\"{exePath}\" --szs \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitGcRebuild", "Hocotate Toolkit - Rebuild GC Disc", $"\"{exePath}\" --gcrebuild \"%1\"");
@@ -459,21 +515,9 @@ namespace RARCToolkit
         {
             try
             {
-                UnregisterFileAssociation(".arc");
-                UnregisterFileAssociation(".szs");
-                UnregisterFileAssociation(".iso");
-                UnregisterNamedFileAssociation(".iso", "HocotateToolkitIso2Wbfs");
-                UnregisterFileAssociation(".gcm");
-                UnregisterFileAssociation(".wbfs");
-                UnregisterFileAssociation(".bmd");
-                UnregisterFileAssociation(".bdl");
-                UnregisterFileAssociation(".dae");
-                UnregisterFileAssociation(".obj");
-                UnregisterDirectoryAssociation("HocotateToolkitPack");
-                UnregisterDirectoryAssociation("HocotateToolkitGcRebuild");
-                UnregisterDirectoryAssociation("HocotateToolkitWiiRebuild");
+                int removed = RemoveHocotateContextMenuEntries();
 
-                Console.WriteLine("Context menu unregistered successfully.");
+                Console.WriteLine($"Context menu unregistered successfully. Removed entries: {removed}");
             }
             catch (Exception ex)
             {
@@ -524,6 +568,107 @@ namespace RARCToolkit
             Registry.CurrentUser.DeleteSubKeyTree(
                 $@"Software\Classes\Directory\shell\{keyName}",
                 throwOnMissingSubKey: false);
+        }
+
+        static int RemoveHocotateContextMenuEntries()
+        {
+            int removed = 0;
+            foreach (string key in EnumerateHocotateContextMenuKeys().Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                bool exists;
+                using (RegistryKey? existing = Registry.CurrentUser.OpenSubKey(key))
+                    exists = existing is not null;
+                if (!exists) continue;
+
+                Registry.CurrentUser.DeleteSubKeyTree(key, throwOnMissingSubKey: false);
+                removed++;
+            }
+            return removed;
+        }
+
+        static IEnumerable<string> EnumerateHocotateContextMenuKeys()
+        {
+            string[] extensions = { ".arc", ".szs", ".iso", ".gcm", ".wbfs", ".bmd", ".bdl", ".dae", ".fbx", ".obj" };
+            string[] keyNames =
+            {
+                "HocotateToolkit",
+                "HocotateToolkitIso2Wbfs",
+                "HocotateToolkitPack",
+                "HocotateToolkitGcRebuild",
+                "HocotateToolkitWiiRebuild",
+                "HocotateToolkitFbx2Bmd",
+                "HocotateToolkitFbxToBmd",
+                "Hocotate_Toolkit",
+                "Hocotate_ToolKit",
+                "Fbx2Bmd",
+                "FbxToBmd",
+                "FBXtoBMD",
+            };
+
+            foreach (string extension in extensions)
+            {
+                foreach (string keyName in keyNames)
+                {
+                    foreach (string key in EnumerateContextMenuKeys(extension, keyName))
+                        yield return key;
+                }
+            }
+
+            foreach (string keyName in keyNames)
+            {
+                yield return $@"Software\Classes\Directory\shell\{keyName}";
+                yield return $@"Software\Classes\Directory\Background\shell\{keyName}";
+            }
+
+            foreach (string root in EnumerateShellRoots(extensions))
+            {
+                using RegistryKey? shellKey = Registry.CurrentUser.OpenSubKey(root);
+                if (shellKey is null)
+                    continue;
+
+                foreach (string subKeyName in shellKey.GetSubKeyNames())
+                {
+                    string fullKey = root + @"\" + subKeyName;
+                    if (IsHocotateContextMenuKey(fullKey, subKeyName))
+                        yield return fullKey;
+                }
+            }
+        }
+
+        static IEnumerable<string> EnumerateShellRoots(IEnumerable<string> extensions)
+        {
+            foreach (string extension in extensions)
+            {
+                yield return $@"Software\Classes\{extension}\shell";
+                yield return $@"Software\Classes\SystemFileAssociations\{extension}\shell";
+
+                string? progId = GetProgIdForExtension(extension);
+                if (!string.IsNullOrWhiteSpace(progId))
+                    yield return $@"Software\Classes\{progId}\shell";
+            }
+
+            yield return @"Software\Classes\Directory\shell";
+            yield return @"Software\Classes\Directory\Background\shell";
+        }
+
+        static bool IsHocotateContextMenuKey(string fullKey, string subKeyName)
+        {
+            if (subKeyName.StartsWith("HocotateToolkit", StringComparison.OrdinalIgnoreCase) ||
+                subKeyName.StartsWith("Hocotate_Toolkit", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(fullKey);
+            string label = key?.GetValue(null) as string ?? "";
+            string icon = key?.GetValue("Icon") as string ?? "";
+            string command = "";
+            using (RegistryKey? commandKey = Registry.CurrentUser.OpenSubKey(fullKey + @"\command"))
+                command = commandKey?.GetValue(null) as string ?? "";
+
+            return label.Contains("Hocotate Toolkit", StringComparison.OrdinalIgnoreCase) ||
+                   icon.Contains("Hocotate", StringComparison.OrdinalIgnoreCase) ||
+                   command.Contains("Hocotate", StringComparison.OrdinalIgnoreCase) ||
+                   (fullKey.Contains(@"\.fbx\shell\", StringComparison.OrdinalIgnoreCase) &&
+                    label.Contains("FBX to BMD", StringComparison.OrdinalIgnoreCase));
         }
 
         static IEnumerable<string> EnumerateContextMenuKeys(string extension, string keyName)
@@ -664,11 +809,12 @@ namespace RARCToolkit
             Console.WriteLine("  --gcrebuild DiscRebuild             jordan-woyak");
             Console.WriteLine("  --wiirebuild DiscRebuild            jordan-woyak");
             Console.WriteLine("  --iso2wbfs  DiscRebuild             jordan-woyak");
-            Console.WriteLine("  --bmd2dae   SuperBMD_2.4.2.1_RC     RenolY2");
-            Console.WriteLine("  --bmd2fbx   MeltyTool               MeltyPlayer");
-            Console.WriteLine("  --bmd2obj   obj2grid                RenolY2");
-            Console.WriteLine("  --dae2bmd   SuperBMD_2.4.2.1_RC     RenolY2");
-            Console.WriteLine("  --obj2grid  obj2grid                RenolY2");
+            Console.WriteLine("  --bmd2dae   BMD_analysis v2    RenolY2");
+            Console.WriteLine("  --bmd2fbx   FBX_analysis v2    MeltyPlayer");
+            Console.WriteLine("  --bmd2obj   BMD_analysis v2    RenolY2");
+            Console.WriteLine("  --dae2bmd   BMD_analysis v2    RenolY2");
+            Console.WriteLine("  --fbx2bmd   BMD_analysis v2    RenolY2");
+            Console.WriteLine("  --obj2grid  obj2grid           RenolY2");
             Console.WriteLine();
             Console.WriteLine("Usage:");
             Console.WriteLine();
@@ -680,6 +826,7 @@ namespace RARCToolkit
             Console.WriteLine("    .wbfs            -> Extract Wii disc");
             Console.WriteLine("    .bmd / .bdl      -> Convert to DAE + FBX + OBJ (batch)");
             Console.WriteLine("    .dae             -> Convert to BMD");
+            Console.WriteLine("    .fbx             -> Convert to BMD");
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
             Console.WriteLine();
             Console.WriteLine("  [Command Line]");
@@ -695,7 +842,8 @@ namespace RARCToolkit
             Console.WriteLine("    --iso2wbfs  <input.iso>   [output.wbfs]");
             Console.WriteLine("    --bmd2dae  <.bmd>         [output.dae]");
             Console.WriteLine("    --dae2bmd  <.dae>         [output.bmd]  [--mat mat.json] [--texheader tex.json]");
-            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   * requires FBX_analysis.exe");
+            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   ASCII FBX + GLB を出力 / Outputs ASCII FBX + GLB");
+            Console.WriteLine("    --fbx2bmd  <.fbx>         [output.bmd]      skeleton_root 付き FBX を推奨 / FBX with skeleton_root recommended");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine();
@@ -708,16 +856,27 @@ namespace RARCToolkit
             Console.WriteLine("    because file layout and FST offsets are regenerated during rebuild.");
             Console.WriteLine("    In round-trip verification, the extracted files\\ contents matched the original.");
             Console.WriteLine();
+            Console.WriteLine("  [FBX Conversion Notes]");
+            Console.WriteLine("    --bmd2fbx: ASCII FBX (FBX 7.5.0) と GLB を同時に出力します。");
+            Console.WriteLine("               FBX に skeleton_root ノードを含むため --fbx2bmd でボーン情報を保持できます。");
+            Console.WriteLine("               Outputs ASCII FBX (FBX 7.5.0) and GLB simultaneously.");
+            Console.WriteLine("               FBX includes skeleton_root node for bone preservation on --fbx2bmd.");
+            Console.WriteLine("    --fbx2bmd: skeleton_root ノードがない FBX はスタティックメッシュとして変換されます。");
+            Console.WriteLine("               BMD->FBX->BMD の往復変換ではファイルサイズが増加しますが動作に影響はありません。");
+            Console.WriteLine("               FBX without skeleton_root is converted as static mesh (no bones).");
+            Console.WriteLine("               Round-trip BMD->FBX->BMD increases file size but does not affect in-game behavior.");
+            Console.WriteLine();
             Console.WriteLine("  [Context Menu]  (no admin rights required)");
             Console.WriteLine("    --register    Add right-click menu entries for supported file types");
             Console.WriteLine("    --unregister  Remove right-click menu entries");
             Console.WriteLine("    Folder menu   -> Pack to SZS / Rebuild GC Disc / Rebuild Wii Disc");
             Console.WriteLine("    .iso menu     -> Extract Disc / Convert ISO to WBFS");
+            Console.WriteLine("    .fbx menu     -> FBX to BMD");
             Console.WriteLine();
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
-            Console.WriteLine("    resource\\DiscExtract.exe  -> used by --gcextract / --wiiextract");
-            Console.WriteLine("    resource\\DiscRebuild.exe  -> used by --gcrebuild / --wiirebuild / --iso2wbfs");
-            Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --bmd2obj");
+            Console.WriteLine("    resource\\DiscExtract.exe   -> used by --gcextract / --wiiextract");
+            Console.WriteLine("    resource\\DiscRebuild.exe   -> used by --gcrebuild / --wiirebuild / --iso2wbfs");
+            Console.WriteLine("    resource\\BMD_analysis.exe  -> used by --bmd2dae / --dae2bmd / --fbx2bmd / --bmd2obj");
             Console.WriteLine("    resource\\FBX_analysis.exe  -> used by --bmd2fbx");
         }
     }

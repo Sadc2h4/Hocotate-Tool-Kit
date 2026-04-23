@@ -53,12 +53,24 @@ namespace RARCToolkit.Conversion
                                    string? materialsJson, string? texHeaderJson)
         {
             ValidateInput(inputDae, ".dae");
-            inputDae = Path.GetFullPath(inputDae);
+            Console.WriteLine($"  DAE → BMD: {Path.GetFileName(inputDae)}");
+            return Model2Bmd(inputDae, outputBmd, materialsJson, texHeaderJson);
+        }
+
+        /// <summary>
+        /// Assimp supported model files (.dae/.fbx) を BMD に変換します。
+        /// スケルトンルート 'skeleton_root' が見つからない場合は --noskeleton で自動リトライします。
+        /// </summary>
+        public static int Model2Bmd(string inputModel, string? outputBmd,
+                                    string? materialsJson, string? texHeaderJson)
+        {
+            ValidateInput(inputModel, ".dae", ".fbx");
+            inputModel = Path.GetFullPath(inputModel);
 
             if (string.IsNullOrEmpty(outputBmd))
             {
-                string dir  = Path.GetDirectoryName(inputDae) ?? ".";
-                string name = Path.GetFileNameWithoutExtension(inputDae);
+                string dir  = Path.GetDirectoryName(inputModel) ?? ".";
+                string name = Path.GetFileNameWithoutExtension(inputModel);
                 outputBmd   = Path.Combine(dir, name + ".bmd");
             }
             outputBmd = Path.GetFullPath(outputBmd);
@@ -67,7 +79,7 @@ namespace RARCToolkit.Conversion
             if (!string.IsNullOrEmpty(texHeaderJson))
                 texHeaderJson = Path.GetFullPath(texHeaderJson);
 
-            var args = new List<string> { inputDae, outputBmd };
+            var args = new List<string> { inputModel, outputBmd };
             if (!string.IsNullOrEmpty(materialsJson))
             {
                 args.Add("--mat");
@@ -79,8 +91,27 @@ namespace RARCToolkit.Conversion
                 args.Add(texHeaderJson);
             }
 
-            Console.WriteLine($"  DAE → BMD: {Path.GetFileName(inputDae)}");
-            int code = ExeRunner.Run(GetSuperBmdExe(), args, Path.GetDirectoryName(inputDae));
+            string? workDir = Path.GetDirectoryName(inputModel);
+            var capturedStderr = new System.Text.StringBuilder();
+            int code = ExeRunner.Run(GetSuperBmdExe(), args, workDir, capturedStderr);
+
+            // SuperBMD がスケルトンルート未検出でクラッシュした場合、--noskeleton で再試行する。
+            // bmd2fbx (FBX_analysis.exe) が出力する FBX はノード名が BMD 内部名 (nodes_X 等) であり
+            // SuperBMD が要求する 'skeleton_root' ノードが存在しないため、このフォールバックが必要になる。
+            if (code != 0 &&
+                capturedStderr.ToString().Contains("skeleton root has not been found",
+                                                   StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine();
+                Console.WriteLine("[Warning] スケルトンルート 'skeleton_root' がモデルに見つかりませんでした。");
+                Console.WriteLine("          スタティックメッシュとして再変換します (--noskeleton)...");
+                Console.WriteLine("          ボーン付きモデルを変換する場合は、3D アプリ側でアーマチュアの");
+                Console.WriteLine("          ルートノードを 'skeleton_root' に名前変更してください。");
+                Console.WriteLine();
+                args.Add("--noskeleton");
+                code = ExeRunner.Run(GetSuperBmdExe(), args, workDir);
+            }
+
             return code;
         }
 

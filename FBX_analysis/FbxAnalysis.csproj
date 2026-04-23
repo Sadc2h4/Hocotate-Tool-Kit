@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>FBX_analysis</AssemblyName>
+    <RootNamespace>fbx_analysis</RootNamespace>
+    <Nullable>enable</Nullable>
+    <!-- MeltyTool-main は net10.0 / LangVersion preview を使用 -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- ビルド環境の個人情報をバイナリに埋め込まない -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    <EmbedAllSources>false</EmbedAllSources>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <EnableSourceLink>false</EnableSourceLink>
+    <!-- 製品情報 -->
+    <Product>FBX_analysis</Product>
+    <Company>C2H4</Company>
+    <Copyright>C2H4</Copyright>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.0</Version>
+    <!-- 同名ネイティブ DLL 競合を無視 -->
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+
+  <!--
+    依存ライブラリは reference_app/MeltyTool-main/ に格納されています。
+    ビルドには reference_app/MeltyTool-main/ が同リポジトリ内に存在する必要があります。
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\reference_app\MeltyTool-main\FinModelUtility\Libraries\JSystem\JSystem\JSystem.csproj" />
+  </ItemGroup>
+</Project>

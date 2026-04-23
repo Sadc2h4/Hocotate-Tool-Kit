@@ -39,8 +39,10 @@ namespace RARCToolkit.Conversion
         /// <param name="exePath">実行ファイルのフルパス</param>
         /// <param name="args">引数リスト（スペースを含む値は自動クォート）</param>
         /// <param name="workingDir">作業ディレクトリ（null の場合は exe と同じディレクトリ）</param>
+        /// <param name="captureStderr">非 null の場合、stderr の内容をここに追記する</param>
         /// <returns>プロセスの終了コード</returns>
-        public static int Run(string exePath, IEnumerable<string> args, string? workingDir = null)
+        public static int Run(string exePath, IEnumerable<string> args, string? workingDir = null,
+                              System.Text.StringBuilder? captureStderr = null)
         {
             string argString = BuildArgString(args);
 
@@ -60,7 +62,12 @@ namespace RARCToolkit.Conversion
 
             // 出力を非同期で転送（デッドロック回避）
             proc.OutputDataReceived += (_, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
-            proc.ErrorDataReceived  += (_, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+            proc.ErrorDataReceived  += (_, e) =>
+            {
+                if (e.Data == null) return;
+                Console.Error.WriteLine(e.Data);
+                captureStderr?.AppendLine(e.Data);
+            };
             proc.BeginOutputReadLine();
             proc.BeginErrorReadLine();
 
