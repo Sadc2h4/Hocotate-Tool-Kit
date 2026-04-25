@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Hocotate_Toolkit</AssemblyName>
+    <RootNamespace>RARCToolkit</RootNamespace>
+    <ApplicationIcon>Olimar_icon.ico</ApplicationIcon>
+    <!-- 単一 exe にする場合: dotnet publish -r win-x64 -c Release -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+    <!-- ── バイナリのプロパティ情報（右クリック→プロパティで表示される内容） ── -->
+    <Product>Hocotate Toolkit</Product>
+    <Description>Hocotate Toolkit</Description>
+    <Company>C2H4</Company>
+    <Copyright>C2H4</Copyright>
+    <AssemblyVersion>1.25.0.0</AssemblyVersion>
+    <FileVersion>1.25.0.0</FileVersion>
+    <Version>1.25.0</Version>
+    <InformationalVersion>1.25a</InformationalVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+
+    <!-- ── ビルド環境の情報（パス・ユーザー名）をバイナリに埋め込まない ── -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
+    <!-- ソースファイルの絶対パスを ./ に置換してユーザー名を除去 -->
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    <!-- ソースコードや追跡情報のバイナリへの埋め込みを無効化 -->
+    <EmbedAllSources>false</EmbedAllSources>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <!-- SourceLink（Gitリポジトリ情報の埋め込み）を無効化 -->
+    <EnableSourceLink>false</EnableSourceLink>
+    <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DiscExtract\**\*.cs" />
+    <Compile Remove="DiscRebuild\**\*.cs" />
+    <Compile Remove="reference_app\**\*.cs" />
+    <Compile Remove="BMD_analysis\**\*.cs" />
+    <Compile Remove="FBX_analysis\**\*.cs" />
+    <EmbeddedResource Remove="DiscExtract\**\*" />
+    <EmbeddedResource Remove="DiscRebuild\**\*" />
+    <EmbeddedResource Remove="reference_app\**\*" />
+    <EmbeddedResource Remove="BMD_analysis\**\*" />
+    <EmbeddedResource Remove="FBX_analysis\**\*" />
+    <None Remove="DiscExtract\**\*" />
+    <None Remove="DiscRebuild\**\*" />
+    <None Remove="reference_app\**\*" />
+    <None Remove="BMD_analysis\**\*" />
+    <None Remove="FBX_analysis\**\*" />
+  </ItemGroup>
+</Project>

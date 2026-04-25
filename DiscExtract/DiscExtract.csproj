@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>DiscExtract</AssemblyName>
+    <RootNamespace>DiscExtract</RootNamespace>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    <EmbedAllSources>false</EmbedAllSources>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <EnableSourceLink>false</EnableSourceLink>
+    <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
+    <Product>Hocotate Toolkit</Product>
+    <Description>Hocotate Toolkit</Description>
+    <Company>C2H4</Company>
+    <Copyright>C2H4</Copyright>
+    <AssemblyVersion>1.25.0.0</AssemblyVersion>
+    <FileVersion>1.25.0.0</FileVersion>
+    <Version>1.25.0</Version>
+    <InformationalVersion>1.25a</InformationalVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+</Project>
