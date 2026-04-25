@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://www.dropbox.com/scl/fi/23jpf0vj5n8qwncrjyll0/Hocotate_Toolkit_v1.25a.zip?rlkey=rajy4x31mkpvbcgc7ag5c8fyc&st=91c7d9xl&dl=0">
+<a href="https://www.dropbox.com/scl/fi/9xiiuive9puob1xe9aq0t/Hocotate_Toolkit_v1.25a.zip?rlkey=anagjw5z1tuee5fz3nruc24i0&st=xna466pj&dl=0">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
