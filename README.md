@@ -9,7 +9,7 @@
 
 ## Download
 
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.24a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.26a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
