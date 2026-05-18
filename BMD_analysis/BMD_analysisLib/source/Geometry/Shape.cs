@@ -331,7 +331,7 @@ namespace SuperBMDLib.Geometry
             Packets.Add(pack);
 
             Bounds.GetBoundsValues(AttributeData.Positions);
-            Console.Write("...OK");
+            Console.Write("...✓");
         }
 
         public void ProcessVerticesWithWeights(Mesh mesh, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, 

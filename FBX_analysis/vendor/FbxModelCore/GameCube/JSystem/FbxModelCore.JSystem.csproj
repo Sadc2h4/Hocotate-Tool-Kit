@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>jsystem</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="src\api\**" />
+    <Compile Remove="src\misc\Flobbster\**" />
+    <Compile Remove="src\misc\G2D_Binary_File_Format\**" />
+    <Compile Remove="src\misc\Language\**" />
+    <Compile Remove="src\misc\Misc\**" />
+    <Compile Remove="src\misc\Tao\**" />
+    <EmbeddedResource Remove="src\api\**" />
+    <EmbeddedResource Remove="src\misc\Flobbster\**" />
+    <EmbeddedResource Remove="src\misc\G2D_Binary_File_Format\**" />
+    <EmbeddedResource Remove="src\misc\Language\**" />
+    <EmbeddedResource Remove="src\misc\Misc\**" />
+    <EmbeddedResource Remove="src\misc\Tao\**" />
+    <None Remove="src\api\**" />
+    <None Remove="src\misc\Flobbster\**" />
+    <None Remove="src\misc\G2D_Binary_File_Format\**" />
+    <None Remove="src\misc\Language\**" />
+    <None Remove="src\misc\Misc\**" />
+    <None Remove="src\misc\Tao\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="src\misc\G3D_Binary_File_Format\AnmHeader.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\DictionaryData.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\Dictionary`1.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\FileHeader.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBCA.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBMA.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBMD.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBTA.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBTP.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBTX.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\NSBVA.cs" />
+    <Compile Remove="src\misc\G3D_Binary_File_Format\Shaders.cs" />
+    <Compile Remove="src\misc\GCN\BLO.cs" />
+    <Compile Remove="src\misc\GCN\BLOShader.cs" />
+    <Compile Remove="src\misc\GCN\BMDShader.cs" />
+    <Compile Remove="src\misc\System\ControlHelper.cs" />
+    <Compile Remove="src\misc\System\ObjectIDTypeConverter.cs" />
+    <Compile Remove="src\misc\System\ObjectSelector.cs" />
+    <Compile Remove="src\misc\System\UInt16HexTypeConverter.cs" />
+    <Compile Remove="src\misc\System\UInt32HexTypeConverter.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="src\api\BmdModelImporterPlugin.cs" />
+    <Compile Include="src\api\BmdModelFileBundle.cs" />
+    <Compile Include="src\api\BmdModelImporter.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\FbxModelCore.Core.csproj" />
+    <ProjectReference Include="..\Gx\FbxModelCore.Gx.csproj" />
+  </ItemGroup>
+
+</Project>

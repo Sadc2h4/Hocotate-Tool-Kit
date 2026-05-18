@@ -512,7 +512,7 @@ namespace SuperBMDLib.BMD
                     }
                 }
                 scene.Meshes.Add(mesh);
-                Console.Write("OK");
+                Console.Write("✓");
                 Console.WriteLine();
                 Console.WriteLine("Used bones by {0}:", mesh.Name);
                 foreach( string name in usedbones)

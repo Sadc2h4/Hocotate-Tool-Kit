@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 using Assimp;
 
@@ -81,15 +82,15 @@ internal static class Program {
   //
   // エクスポートパイプライン:
   //   BMD → IModel → 一時 GLB → Assimp シーン
-  //     → ボーンルートを skeleton_root にリネーム → ASCII FBX 出力
+  //     → skeleton_root ノード挿入 → ASCII FBX 出力
   //
   // ASCII FBX を使用する理由:
   //   BMD_analysis.exe 内部の Assimp 3.3.1 (2016) は Assimp 5.x が書き出す
   //   FBX バイナリ v7600 を読めない。ASCII FBX はバージョン非依存。
   //
-  // skeleton_root にリネームする理由:
+  // skeleton_root を挿入する理由:
   //   BMD_analysis.exe (SuperBMD) は FBX→BMD 変換時にシーン直下の
-  //   "skeleton_root" ノードを必須とする。このノードが無いと
+  //   "skeleton_root" ダミーノードを必須とする。このノードが無いと
   //   ボーン情報が失われた状態でBMD化される。
   //-------------------------------------------------------------------------------
   private static int RunConvert(string bmdPath, string outputDir) {
@@ -127,7 +128,7 @@ internal static class Program {
       gltfExporter.ExportModel(new ModelExporterParams {
           Model      = model,
           OutputFile = new FinFile(glbPath),
-          Scale      = 100,
+          Scale      = 1,
       });
 
       Console.WriteLine("Converting GLB -> FBX (ASCII) with skeleton_root...");
@@ -143,10 +144,10 @@ internal static class Program {
       AssimpIndirectTextureFixer.Fix(model, assScene);
 
       //-------------------------------------------------------------------------------
-      // シーン直下のボーン系ノードを "skeleton_root" にリネームする
+      // シーン直下のボーン系ノードを "skeleton_root" でラップする
       // SuperBMD は RootNode の直下に "skeleton_root" ノードがあることを前提とする
       //-------------------------------------------------------------------------------
-      RenameSkeletonRoot(assScene);
+      InsertSkeletonRoot(assScene);
 
       //-------------------------------------------------------------------------------
       // ASCII FBX でエクスポートする（旧 Assimp との互換性を確保）
@@ -166,10 +167,10 @@ internal static class Program {
   }
 
   //-------------------------------------------------------------------------------
-  // Assimp シーンの RootNode 直下にあるボーン系ノードを "skeleton_root" にリネームする
-  // Blender 上で nodes_0 などのアーマチュア名を skeleton_root に変更する作業と同等
+  // Assimp シーンの RootNode 直下に "skeleton_root" ダミーノードを挿入する
+  // メッシュを持たない上位ノード（ボーン系ノード）を skeleton_root の子に移動する
   //-------------------------------------------------------------------------------
-  private static void RenameSkeletonRoot(Scene scene) {
+  private static void InsertSkeletonRoot(Scene scene) {
     // 既に skeleton_root があればスキップ
     if (scene.RootNode.Children.Any(c => c.Name == "skeleton_root")) {
       return;
@@ -196,17 +197,28 @@ internal static class Program {
       return;
     }
 
-    var skeletonRoot = boneRootCandidates[0];
-    var previousName = skeletonRoot.Name;
-    skeletonRoot.Name = "skeleton_root";
+    // skeleton_root ダミーノードを作成してボーンルートを移動する
+    var skeletonRoot = new Node("skeleton_root");
 
-    Console.WriteLine($"  skeleton_root: renamed {previousName}");
+    foreach (var node in boneRootCandidates) {
+      scene.RootNode.Children.Remove(node);
 
-    if (boneRootCandidates.Count > 1) {
-      Console.WriteLine($"  warning: found {boneRootCandidates.Count} bone root candidates; only the first was renamed.");
-      foreach (var n in boneRootCandidates.Skip(1)) {
-        Console.WriteLine($"    skipped: {n.Name}");
+      if (IsGeneratedIdentityContainer(node)) {
+        foreach (var child in node.Children.ToList()) {
+          node.Children.Remove(child);
+          skeletonRoot.Children.Add(child);
+        }
+        continue;
       }
+
+      skeletonRoot.Children.Add(node);
+    }
+
+    scene.RootNode.Children.Add(skeletonRoot);
+
+    Console.WriteLine($"  skeleton_root: wrapped {boneRootCandidates.Count} node(s)");
+    foreach (var n in boneRootCandidates) {
+      Console.WriteLine($"    -> {n.Name}");
     }
   }
 
@@ -218,6 +230,38 @@ internal static class Program {
       System.Collections.Generic.HashSet<string> boneNames) {
     if (boneNames.Contains(node.Name)) return true;
     return node.Children.Any(c => ContainsBone(c, boneNames));
+  }
+
+  //-------------------------------------------------------------------------------
+  // GLB 経由で生成される空の中間ノードをスケルトンの実ルートから除外する
+  //-------------------------------------------------------------------------------
+  private static bool IsGeneratedIdentityContainer(Node node) {
+    return node.Name.StartsWith("nodes[", StringComparison.Ordinal) &&
+           !node.HasMeshes &&
+           IsIdentityTransform(node.Transform);
+  }
+
+  //-------------------------------------------------------------------------------
+  // ノード変換が実質的に単位行列かを確認する
+  //-------------------------------------------------------------------------------
+  private static bool IsIdentityTransform(Matrix4x4 transform) {
+    const float epsilon = 0.00001f;
+    return Math.Abs(transform.M11 - 1) < epsilon &&
+           Math.Abs(transform.M22 - 1) < epsilon &&
+           Math.Abs(transform.M33 - 1) < epsilon &&
+           Math.Abs(transform.M44 - 1) < epsilon &&
+           Math.Abs(transform.M12) < epsilon &&
+           Math.Abs(transform.M13) < epsilon &&
+           Math.Abs(transform.M14) < epsilon &&
+           Math.Abs(transform.M21) < epsilon &&
+           Math.Abs(transform.M23) < epsilon &&
+           Math.Abs(transform.M24) < epsilon &&
+           Math.Abs(transform.M31) < epsilon &&
+           Math.Abs(transform.M32) < epsilon &&
+           Math.Abs(transform.M34) < epsilon &&
+           Math.Abs(transform.M41) < epsilon &&
+           Math.Abs(transform.M42) < epsilon &&
+           Math.Abs(transform.M43) < epsilon;
   }
 
   //-------------------------------------------------------------------------------

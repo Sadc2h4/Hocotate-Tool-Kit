@@ -18,10 +18,10 @@
     <Description>Hocotate Toolkit</Description>
     <Company>C2H4</Company>
     <Copyright>C2H4</Copyright>
-    <AssemblyVersion>1.25.0.0</AssemblyVersion>
-    <FileVersion>1.25.0.0</FileVersion>
-    <Version>1.25.0</Version>
-    <InformationalVersion>1.25a</InformationalVersion>
+    <AssemblyVersion>1.24.0.0</AssemblyVersion>
+    <FileVersion>1.24.0.0</FileVersion>
+    <Version>1.24.0</Version>
+    <InformationalVersion>1.24a</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
     <!-- ── ビルド環境の情報（パス・ユーザー名）をバイナリに埋め込まない ── -->

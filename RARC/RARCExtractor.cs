@@ -18,14 +18,14 @@ namespace RARCToolkit.RARC
             // Yaz0 圧縮されている場合は展開
             if (Yaz0.IsYaz0(raw))
             {
-                Console.WriteLine("  Yaz0 compression detected. Decompressing...");
+                Console.WriteLine("  Yaz0 圧縮を検出 — 展開中...");
                 raw = Yaz0.Decompress(raw);
             }
 
             // RARC マジック確認
             string magic = Encoding.ASCII.GetString(raw, 0, 4);
             if (magic != "RARC")
-                throw new InvalidDataException($"This is not a RARC file (magic: {magic})");
+                throw new InvalidDataException($"RARC ファイルではありません (magic: {magic})");
 
             using var ms = new MemoryStream(raw);
             using var r  = new EndianBinaryReader(ms);
@@ -99,7 +99,7 @@ namespace RARCToolkit.RARC
             Directory.CreateDirectory(outputDir);
             ExtractNode(nodes, entries, raw, (int)dataAbsOffset, GetStr, 0, outputDir);
 
-            Console.WriteLine($"  Extraction complete: {outputDir}");
+            Console.WriteLine($"  展開完了: {outputDir}");
         }
 
         // ─── プライベートメソッド ────────────────────────────────────
@@ -138,10 +138,10 @@ namespace RARCToolkit.RARC
                     int    fileEnd   = fileStart + entry.DataSize;
 
                     if (fileEnd > raw.Length)
-                        throw new InvalidDataException($"File data is out of range: {name}");
+                        throw new InvalidDataException($"ファイルデータが範囲外: {name}");
 
                     File.WriteAllBytes(filePath, raw[fileStart..fileEnd]);
-                    Console.WriteLine($"  Extracted: {filePath}");
+                    Console.WriteLine($"  展開: {filePath}");
                 }
             }
         }

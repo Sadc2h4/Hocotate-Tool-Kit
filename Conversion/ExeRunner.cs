@@ -27,10 +27,10 @@ namespace RARCToolkit.Conversion
             }
 
             throw new FileNotFoundException(
-                $"'{exeName}' was not found.\n" +
-                $"Place it in the resource\\ folder next to Hocotate_Toolkit.exe.\n" +
-                $"Example: resource\\{exeName}\n" +
-                $"Search base: {baseDir}");
+                $"'{exeName}' が見つかりません。\n" +
+                $"RARCToolkit.exe と同じ階層の resource\\ フォルダに配置してください。\n" +
+                $"例: resource\\{exeName}\n" +
+                $"検索元: {baseDir}");
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace RARCToolkit.Conversion
             };
 
             using var proc = Process.Start(psi)
-                ?? throw new InvalidOperationException($"Failed to start process: {exePath}");
+                ?? throw new InvalidOperationException($"プロセスを起動できませんでした: {exePath}");
 
             // 出力を非同期で転送（デッドロック回避）
             proc.OutputDataReceived += (_, e) => { if (e.Data != null) Console.WriteLine(e.Data); };

@@ -48,11 +48,11 @@ namespace RARCToolkit
                 PrintBanner();
                 PrintUsage();
                 Console.WriteLine();
-                Console.WriteLine("--------------------------------------------------------------");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
                 Console.WriteLine("  This tool is designed to be used in two ways:");
                 Console.WriteLine("  1. Drag & drop a file or folder directly onto this exe.");
                 Console.WriteLine("  2. Call from a batch file or program with arguments.");
-                Console.WriteLine("--------------------------------------------------------------");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
                 Console.WriteLine();
                 WaitForKeyIfInteractive();
                 return 1;
@@ -167,7 +167,7 @@ namespace RARCToolkit
             }
 
             Console.WriteLine();
-            Console.WriteLine("--------------------------------------------------------------");
+            Console.WriteLine("──────────────────────────────────────────────────────────────");
             Console.WriteLine(result == 0 ? "Done." : "Completed with errors.");
             WaitForKeyIfInteractive();
             return result;
@@ -235,7 +235,7 @@ namespace RARCToolkit
 
         static void RunStep(string label, Func<int> action, ref int overall)
         {
-            Console.WriteLine($"-- {label} ----------------------");
+            Console.WriteLine($"── {label} ──────────────────────");
             try
             {
                 int r = action();
@@ -842,8 +842,8 @@ namespace RARCToolkit
             Console.WriteLine("    --iso2wbfs  <input.iso>   [output.wbfs]");
             Console.WriteLine("    --bmd2dae  <.bmd>         [output.dae]");
             Console.WriteLine("    --dae2bmd  <.dae>         [output.bmd]  [--mat mat.json] [--texheader tex.json]");
-            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   Outputs ASCII FBX + GLB");
-            Console.WriteLine("    --fbx2bmd  <.fbx>         [output.bmd]      FBX with skeleton_root recommended");
+            Console.WriteLine("    --bmd2fbx  <.bmd>         [output folder]   ASCII FBX + GLB を出力 / Outputs ASCII FBX + GLB");
+            Console.WriteLine("    --fbx2bmd  <.fbx>         [output.bmd]      skeleton_root 付き FBX を推奨 / FBX with skeleton_root recommended");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine();
@@ -857,9 +857,13 @@ namespace RARCToolkit
             Console.WriteLine("    In round-trip verification, the extracted files\\ contents matched the original.");
             Console.WriteLine();
             Console.WriteLine("  [FBX Conversion Notes]");
-            Console.WriteLine("    --bmd2fbx: Outputs ASCII FBX (FBX 7.5.0) and GLB simultaneously.");
-            Console.WriteLine("               The bone hierarchy root is renamed to skeleton_root for bone preservation on --fbx2bmd.");
-            Console.WriteLine("    --fbx2bmd: FBX without skeleton_root is converted as static mesh (no bones).");
+            Console.WriteLine("    --bmd2fbx: ASCII FBX (FBX 7.5.0) と GLB を同時に出力します。");
+            Console.WriteLine("               FBX に skeleton_root ノードを含むため --fbx2bmd でボーン情報を保持できます。");
+            Console.WriteLine("               Outputs ASCII FBX (FBX 7.5.0) and GLB simultaneously.");
+            Console.WriteLine("               FBX includes skeleton_root node for bone preservation on --fbx2bmd.");
+            Console.WriteLine("    --fbx2bmd: skeleton_root ノードがない FBX はスタティックメッシュとして変換されます。");
+            Console.WriteLine("               BMD->FBX->BMD の往復変換ではファイルサイズが増加しますが動作に影響はありません。");
+            Console.WriteLine("               FBX without skeleton_root is converted as static mesh (no bones).");
             Console.WriteLine("               Round-trip BMD->FBX->BMD increases file size but does not affect in-game behavior.");
             Console.WriteLine();
             Console.WriteLine("  [Context Menu]  (no admin rights required)");

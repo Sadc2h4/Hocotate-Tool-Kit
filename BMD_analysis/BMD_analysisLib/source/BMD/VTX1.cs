@@ -163,7 +163,7 @@ namespace SuperBMDLib.BMD
 
                     Console.Write(".");
                 }
-                Console.Write("OK");
+                Console.Write("✓");
                 Console.WriteLine();
             }
         }

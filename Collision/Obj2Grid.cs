@@ -48,20 +48,20 @@ namespace RARCToolkit.Collision
             outputGrid    ??= Path.Combine(baseDir, "grid.bin");
             outputMapcode ??= Path.Combine(baseDir, "mapcode.bin");
 
-            Console.WriteLine($"Parsing OBJ: {inputObj}");
+            Console.WriteLine($"OBJ 解析中: {inputObj}");
             var (vertices, faces) = ReadObj(inputObj, flipYZ);
-            Console.WriteLine($"  Vertices: {vertices.Count}, Faces: {faces.Count}");
+            Console.WriteLine($"  頂点数: {vertices.Count}, 面数: {faces.Count}");
 
             if (faces.Any(f => f.V1 >= vertices.Count || f.V2 >= vertices.Count || f.V3 >= vertices.Count))
-                throw new InvalidDataException("The OBJ file contains an out-of-range vertex index.");
+                throw new InvalidDataException("OBJ ファイルに範囲外の頂点インデックスが含まれています。");
 
-            Console.WriteLine($"Writing grid.bin: {outputGrid}");
+            Console.WriteLine($"grid.bin 書き込み中: {outputGrid}");
             WriteGridBin(outputGrid, vertices, faces, cellSize);
 
-            Console.WriteLine($"Writing mapcode.bin: {outputMapcode}");
+            Console.WriteLine($"mapcode.bin 書き込み中: {outputMapcode}");
             WriteMapcodeBin(outputMapcode, faces);
 
-            Console.WriteLine("Collision conversion complete.");
+            Console.WriteLine("コリジョン変換 完了");
         }
 
         // ─── OBJ パーサー ─────────────────────────────────────────────
@@ -98,9 +98,9 @@ namespace RARCToolkit.Collision
                     {
                         if (parts.Length != 4)
                             throw new InvalidDataException(
-                                $"The model is not triangulated. A face with four or more vertices was found.\n" +
-                                $"Triangulate the model before exporting it from Blender or another 3D tool.\n" +
-                                $"Problem line: {line}");
+                                $"モデルが三角形分割されていません。4 頂点以上の面が含まれています。\n" +
+                                $"Blender 等でエクスポート前に三角形化してください。\n" +
+                                $"問題の行: {line}");
                         var (v1, n1) = ParseFaceVertex(parts[1]);
                         var (v2, n2) = ParseFaceVertex(parts[2]);
                         var (v3, n3) = ParseFaceVertex(parts[3]);
@@ -222,8 +222,8 @@ namespace RARCToolkit.Collision
             int gridSizeX = (int)((endX - startX) / cellSize);
             int gridSizeZ = (int)((endZ - startZ) / cellSize);
 
-            Console.WriteLine($"  Collision bounds: X [{startX} .. {endX}]  Z [{startZ} .. {endZ}]");
-            Console.WriteLine($"  Grid size: {gridSizeX} x {gridSizeZ}  Cell: {cellSize}");
+            Console.WriteLine($"  コリジョン境界: X [{startX} .. {endX}]  Z [{startZ} .. {endZ}]");
+            Console.WriteLine($"  グリッドサイズ: {gridSizeX} x {gridSizeZ}  セル: {cellSize}");
 
             // ── グリッド境界ヘッダー ──
             w.WriteFloat(startX); w.WriteFloat(minY); w.WriteFloat(startZ);

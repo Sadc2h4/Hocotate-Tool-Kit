@@ -33,6 +33,11 @@ BenchmarkDotNet.Artifacts/
 # ログ・一時
 *.log
 
+# 配布成果物
+# 100MBを超えるzipや自己完結exeはGitHub Releasesへ添付し、Git履歴には入れない
+publish/*.zip
+publish/Hocotate_Toolkit_v*/
+
 # OSごみ
 Thumbs.db
 .DS_Store

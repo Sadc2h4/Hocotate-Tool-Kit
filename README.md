@@ -9,7 +9,7 @@
 
 ## Download
 
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.25a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.24a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://www.dropbox.com/scl/fi/9xiiuive9puob1xe9aq0t/Hocotate_Toolkit_v1.25a.zip?rlkey=anagjw5z1tuee5fz3nruc24i0&st=xna466pj&dl=0">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.24a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -233,15 +233,17 @@ Wii rebuild uses `ticket.bin`, `tmd.bin`, `cert.bin`, `disc\header.bin`, and `di
 ### FBX Conversion Notes / FBX 変換について
 
 **`--bmd2fbx` (BMD → FBX)**  
-v1.25a では `FBX_analysis v2`（MeltyTool / Assimp 5.x ベース）を使用しています．
+v1.24a では `FBX_analysis v2` のBMD→FBX出力スケールとスケルトンルート処理を修正しました．
 
 - 出力 FBX の形式が **バイナリから ASCII 形式（FBX 7.5.0）** に変更されました．
   - ASCII FBX は `--fbx2bmd` で使用する `BMD_analysis v2` 内部の Assimp 3.x と互換性があります．
 - FBX と同時に **`モデル名_gltf.glb`** ファイルも出力されます（Blender 等に直接インポート可能）．
-- FBX 内部ではボーン階層のルートノード（例: `nodes_0`）を `skeleton_root` にリネームし，`--fbx2bmd` での再変換時にボーン情報が保持されます．
+- FBX 内部に `skeleton_root` ダミーノードが含まれ，`--fbx2bmd` での再変換時にボーン情報が保持されます．
+- BMD → FBX → BMD の往復変換で，モデルが100倍程度に巨大化しないように修正しました．
+- GLB/Assimp変換で生成される中間ルートを除外し，余分なrootジョイントがBMDへ戻らないようにしました．
 
 **`--fbx2bmd` (FBX → BMD)**  
-v1.25a では `BMD_analysis v2`（SuperBMD 再ビルド版）を使用しています．
+以前の更新で `BMD_analysis v2`（SuperBMD 再ビルド版）に更新されています．
 
 - FBX に `skeleton_root` ノードが存在しない場合，スタティックメッシュ（骨格なし）として変換します．
 - BMD → FBX → BMD の往復変換では，元のファイルよりサイズが増加します（ゲーム内動作への影響はありません）．
@@ -252,15 +254,17 @@ v1.25a では `BMD_analysis v2`（SuperBMD 再ビルド版）を使用してい�
 ----------------------------------------------------------------------------------------------------
 
 **`--bmd2fbx` (BMD → FBX)**  
-v1.25a uses `FBX_analysis v2` (based on MeltyTool / Assimp 5.x).
+v1.24a fixes the BMD-to-FBX output scale and skeleton root handling in `FBX_analysis v2`.
 
 - The FBX output format changed from binary to **ASCII (FBX 7.5.0)**.
   - ASCII FBX is compatible with Assimp 3.x inside `BMD_analysis v2` used by `--fbx2bmd`.
 - A **`modelname_gltf.glb`** file is also exported alongside the FBX (importable directly in Blender etc.).
-- The FBX renames the bone hierarchy root node (for example, `nodes_0`) to `skeleton_root` so that bone data is preserved when converting back with `--fbx2bmd`.
+- The FBX includes a `skeleton_root` dummy node so that bone data is preserved when converting back with `--fbx2bmd`.
+- Round-trip BMD → FBX → BMD conversion no longer scales models up by roughly 100x.
+- Generated intermediate root nodes from the GLB/Assimp conversion are flattened so extra root joints are not written back into BMD files.
 
 **`--fbx2bmd` (FBX → BMD)**  
-v1.25a uses `BMD_analysis v2` (rebuilt SuperBMD).
+Previously updated to `BMD_analysis v2` (rebuilt SuperBMD).
 
 - If the FBX does not contain a `skeleton_root` node, it is converted as a static mesh (no skeleton).
 - Round-trip BMD → FBX → BMD conversion results in a larger output file than the original (no effect on in-game behavior).
@@ -296,7 +300,6 @@ The folder context menu now registers these three separate entries:
 `Hocotate Toolkit - Rebuild GC Disc`
 `Hocotate Toolkit - Rebuild Wii Disc`
 
-> [!IMPORTANT]
 > **過去バージョンのメニューが残っている場合 / Removing leftover entries from older versions:**  
 > 以前のバージョンで登録したメニューが右クリックに残り続けている場合は，一度 `Unregister_ContextMenu.bat` を実行して古いエントリをすべて削除してから，改めて `Register_ContextMenu.bat` で再登録してください．  
 > アンレジストレーションはラベル名・アイコンパスを検索して過去バージョンのキー名も含めて網羅的に削除するため，旧バージョンのメニューも正しく除去されます．  
@@ -304,7 +307,6 @@ The folder context menu now registers these three separate entries:
 > If context menu entries from a previous version remain in the right-click menu, run `Unregister_ContextMenu.bat` first to remove all leftover entries, then run `Register_ContextMenu.bat` again to re-register cleanly.  
 > The unregistration searches by label name and icon path, covering old version key names as well, so entries from any prior version are correctly removed.
 
-> [!IMPORTANT]
 > **注意 / Note:** Windows 11 では **"その他のオプションを確認"** をクリックして表示される旧右クリックメニュー内に項目が表示されます．  
 > On Windows 11, the Hocotate Toolkit entries appear under **"Show more options"** (the legacy context menu).
 

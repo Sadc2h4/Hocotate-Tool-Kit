@@ -34,7 +34,7 @@ namespace RARCToolkit.Conversion
             if (!string.IsNullOrEmpty(outputDae))
                 args.Add(outputDae);
 
-            Console.WriteLine($"  BMD -> DAE: {Path.GetFileName(inputBmd)}");
+            Console.WriteLine($"  BMD → DAE: {Path.GetFileName(inputBmd)}");
             int code = ExeRunner.Run(GetSuperBmdExe(), args, Path.GetDirectoryName(inputBmd));
             return code;
         }
@@ -53,7 +53,7 @@ namespace RARCToolkit.Conversion
                                    string? materialsJson, string? texHeaderJson)
         {
             ValidateInput(inputDae, ".dae");
-            Console.WriteLine($"  DAE -> BMD: {Path.GetFileName(inputDae)}");
+            Console.WriteLine($"  DAE → BMD: {Path.GetFileName(inputDae)}");
             return Model2Bmd(inputDae, outputBmd, materialsJson, texHeaderJson);
         }
 
@@ -96,17 +96,17 @@ namespace RARCToolkit.Conversion
             int code = ExeRunner.Run(GetSuperBmdExe(), args, workDir, capturedStderr);
 
             // SuperBMD がスケルトンルート未検出でクラッシュした場合、--noskeleton で再試行する。
-            // 外部FBXや古い bmd2fbx 出力など、SuperBMD が要求する 'skeleton_root' ノードが
-            // 存在しないモデルをスタティックメッシュとして扱うためのフォールバック。
+            // bmd2fbx (FBX_analysis.exe) が出力する FBX はノード名が BMD 内部名 (nodes_X 等) であり
+            // SuperBMD が要求する 'skeleton_root' ノードが存在しないため、このフォールバックが必要になる。
             if (code != 0 &&
                 capturedStderr.ToString().Contains("skeleton root has not been found",
                                                    StringComparison.OrdinalIgnoreCase))
             {
                 Console.WriteLine();
-                Console.WriteLine("[Warning] The model does not contain a 'skeleton_root' node.");
-                Console.WriteLine("          Retrying as a static mesh (--noskeleton)...");
-                Console.WriteLine("          For rigged models, rename the armature/root node to 'skeleton_root'");
-                Console.WriteLine("          in your 3D application before converting.");
+                Console.WriteLine("[Warning] スケルトンルート 'skeleton_root' がモデルに見つかりませんでした。");
+                Console.WriteLine("          スタティックメッシュとして再変換します (--noskeleton)...");
+                Console.WriteLine("          ボーン付きモデルを変換する場合は、3D アプリ側でアーマチュアの");
+                Console.WriteLine("          ルートノードを 'skeleton_root' に名前変更してください。");
                 Console.WriteLine();
                 args.Add("--noskeleton");
                 code = ExeRunner.Run(GetSuperBmdExe(), args, workDir);
@@ -135,7 +135,7 @@ namespace RARCToolkit.Conversion
                 args.Add(outputObj);
             args.Add("--exportobj");
 
-            Console.WriteLine($"  BMD -> OBJ: {Path.GetFileName(inputBmd)}");
+            Console.WriteLine($"  BMD → OBJ: {Path.GetFileName(inputBmd)}");
             int code = ExeRunner.Run(GetSuperBmdExe(), args, Path.GetDirectoryName(inputBmd));
             return code;
         }
@@ -172,7 +172,7 @@ namespace RARCToolkit.Conversion
                 "--static",
             };
 
-            Console.WriteLine($"  BMD -> FBX: {Path.GetFileName(inputBmd)} -> {outputDir}");
+            Console.WriteLine($"  BMD → FBX: {Path.GetFileName(inputBmd)} → {outputDir}");
             int code = ExeRunner.Run(bmd2fbxExe, args, Path.GetDirectoryName(bmd2fbxExe));
             return code;
         }
@@ -182,15 +182,15 @@ namespace RARCToolkit.Conversion
         private static void ValidateInput(string path, params string[] allowedExts)
         {
             if (!File.Exists(path))
-                throw new FileNotFoundException($"Input file not found: {path}");
+                throw new FileNotFoundException($"入力ファイルが見つかりません: {path}");
 
             string ext = Path.GetExtension(path).ToLower();
             bool ok = false;
             foreach (string e in allowedExts) if (e == ext) { ok = true; break; }
             if (!ok)
                 throw new ArgumentException(
-                    $"Unsupported input file extension: {ext}\n" +
-                    $"Accepted extensions: {string.Join(", ", allowedExts)}");
+                    $"入力ファイルの拡張子が正しくありません: {ext}\n" +
+                    $"受け付ける拡張子: {string.Join(", ", allowedExts)}");
         }
     }
 }

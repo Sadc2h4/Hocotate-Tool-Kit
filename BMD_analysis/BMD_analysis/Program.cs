@@ -155,7 +155,7 @@ namespace SuperBMDLib
             {
                 Console.Write("Finishing the Job...");
                 mod.ExportBMD(cmd_args.output_path, cmd_args.output_bdl, headerString);
-                Console.WriteLine("OK");
+                Console.WriteLine("✓");
             }
 
             Console.WriteLine();

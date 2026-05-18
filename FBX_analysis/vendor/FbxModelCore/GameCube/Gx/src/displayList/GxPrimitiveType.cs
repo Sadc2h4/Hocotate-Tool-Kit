@@ -1,0 +1,11 @@
+﻿namespace gx.displayList;
+
+public enum GxPrimitiveType {
+  GX_QUADS = GxOpcode.DRAW_QUADS,
+  GX_TRIANGLES = GxOpcode.DRAW_TRIANGLES,
+  GX_TRIANGLE_STRIP = GxOpcode.DRAW_TRIANGLE_STRIP,
+  GX_TRIANGLE_FAN = GxOpcode.DRAW_TRIANGLE_FAN,
+  GX_LINES = GxOpcode.DRAW_LINES,
+  GX_LINE_STRIP = GxOpcode.DRAW_LINE_STRIP,
+  GX_POINTS = GxOpcode.DRAW_POINTS,
+}

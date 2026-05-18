@@ -164,7 +164,7 @@ namespace SuperBMDLib.BMD
                     flatSkel[index].SetInverseBindMatrix(transposed);
                 }
             }
-            Console.Write(".OK");
+            Console.Write(".✓");
         }
 
         public void SetInverseBindMatrices(List<Rigging.Bone> flatSkel)
