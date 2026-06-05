@@ -171,6 +171,7 @@ namespace RARCToolkit.RARC
             foreach (char c in StringTable) w.Write((byte)c);
             Pad32(w);
             w.Write(Data.ToArray());
+            Pad32(w);
         }
 
         static void Pad32(EndianBinaryWriter w)

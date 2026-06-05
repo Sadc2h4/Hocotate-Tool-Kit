@@ -6,7 +6,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+if ([string]::IsNullOrWhiteSpace($projectRoot)) {
+    $projectRoot = (Get-Location).Path
+}
 $outputRootPath = Join-Path $projectRoot $OutputRoot
 $resourceOutput = Join-Path $outputRootPath "resource"
 $intermediateOutput = Join-Path $outputRootPath "_publish"
@@ -36,11 +39,11 @@ $projects = @(
 )
 
 # BMD_analysis は net48 のため dotnet build で個別ビルド（publish は別処理）
-$bmdAnalysisProject   = Join-Path $projectRoot "BMD_analysis\BMD_analysis\BMD_analysis.csproj"
+$bmdProjectPath = "${projectRoot}\BMD_analysis\BMD_analysis\BMD_analysis.csproj"
 $bmdAnalysisPublishDir = Join-Path $outputRootPath "_publish\BMD_analysis"
 
 # FBX_analysis は net10.0 のため dotnet publish で個別ビルド
-$fbxAnalysisProject   = Join-Path $projectRoot "FBX_analysis\FbxAnalysis.csproj"
+$fbxProjectPath = "${projectRoot}\FBX_analysis\FbxAnalysis.csproj"
 $fbxAnalysisPublishDir = Join-Path $outputRootPath "_publish\FBX_analysis"
 
 # ── 出力フォルダ初期化 ─────────────────────────────────────────────────────────
@@ -76,12 +79,22 @@ foreach ($entry in $projects) {
 # ── BMD_analysis (net48) をビルド ────────────────────────────────────────────
 
 Write-Host "Building BMD_analysis (net48)..."
+Write-Host "  Project: $bmdProjectPath"
+if (-not (Test-Path $bmdProjectPath)) {
+    throw "BMD_analysis project file was not found: $bmdProjectPath"
+}
 if (Test-Path $bmdAnalysisPublishDir) {
     Remove-Item -Recurse -Force $bmdAnalysisPublishDir
 }
 New-Item -ItemType Directory -Force -Path $bmdAnalysisPublishDir | Out-Null
 
-& dotnet build $bmdAnalysisProject -c $Configuration
+$bmdBuildArgs = @(
+    "build",
+    $bmdProjectPath,
+    "-c", $Configuration
+)
+
+& dotnet @bmdBuildArgs
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet build failed for BMD_analysis."
 }
@@ -106,7 +119,14 @@ if (Test-Path $fbxAnalysisPublishDir) {
     Remove-Item -Recurse -Force $fbxAnalysisPublishDir
 }
 
-& dotnet publish $fbxAnalysisProject -c $Configuration -o $fbxAnalysisPublishDir
+$fbxPublishArgs = @(
+    "publish",
+    $fbxProjectPath,
+    "-c", $Configuration,
+    "-o", $fbxAnalysisPublishDir
+)
+
+& dotnet @fbxPublishArgs
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed for FBX_analysis."
 }
@@ -136,6 +156,7 @@ Copy-Item (Join-Path $projects[2].PublishDir "Hocotate_Toolkit.exe") $outputRoot
 Copy-Item (Join-Path $projectRoot "README.md") $outputRootPath -Force
 Copy-Item (Join-Path $projectRoot "Register_ContextMenu.bat") $outputRootPath -Force
 Copy-Item (Join-Path $projectRoot "Unregister_ContextMenu.bat") $outputRootPath -Force
+Copy-Item (Join-Path $projectRoot "アップデートノート.txt") (Join-Path $outputRootPath "アップデート内容.txt") -Force
 
 # ── 中間ファイル削除・ZIP 作成 ────────────────────────────────────────────────
 

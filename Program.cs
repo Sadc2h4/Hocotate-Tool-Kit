@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 using RARCToolkit.Collision;
+using RARCToolkit.Compression;
 using RARCToolkit.Conversion;
 using RARCToolkit.IO;
 using RARCToolkit.RARC;
@@ -100,6 +101,8 @@ namespace RARCToolkit
                     "fbx2bmd"  => DoFbx2Bmd(input, OptArg(args, 2)),
                     "bmd2obj"  => DoBmd2Obj(input, OptArg(args, 2)),
                     "obj2grid" => DoObj2Grid(args),
+                    "bmgextract" => DoBmgExtract(input, OptArg(args, 2)),
+                    "bmgpack" => DoBmgPack(args),
                     _ => UnknownMode(args[0]),
                 };
             }
@@ -151,6 +154,8 @@ namespace RARCToolkit
                         ".dae"           => RunDae2Bmd(path),
                         ".fbx"           => RunFbx2Bmd(path),
                         ".obj"           => RunObj2Grid(path),
+                        ".bmg"           => RunBmgExtract(path),
+                        ".txt" or ".json"=> RunBmgPack(path),
                         _                => UnknownDrop(ext),
                     };
                 }
@@ -229,7 +234,7 @@ namespace RARCToolkit
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj, .bmg, .txt, .json");
             return 1;
         }
 
@@ -272,7 +277,7 @@ namespace RARCToolkit
             RequireDirectory(folderPath);
             outputPath = NormalizeOutputPath(outputPath) ?? SiblingFile(folderPath, ".szs");
             Console.WriteLine($"SZS pack: {folderPath} -> {outputPath}");
-            PackFolder(folderPath, outputPath);
+            PackFolderToSzs(folderPath, outputPath);
             Console.WriteLine("Done.");
             return 0;
         }
@@ -350,6 +355,60 @@ namespace RARCToolkit
             outputPath = NormalizeOutputPath(outputPath);
             Console.WriteLine($"Disc rebuild: {inputFolder} -> {outputPath ?? "(auto)"}");
             return DiscRebuildConvert.RebuildDisc(inputFolder, outputPath);
+        }
+
+        // ── BMG text pack / extract ─────────────────────────────────────────
+
+        //-------------------------------------------------------------------------------
+        // BMGファイルをドラッグ＆ドロップで展開する処理
+        //-------------------------------------------------------------------------------
+        static int RunBmgExtract(string path)
+        {
+            Console.WriteLine("[BMG] -> JSON text extract");
+            return DoBmgExtract(path, null);
+        }
+
+        //-------------------------------------------------------------------------------
+        // BMG用JSONテキストをドラッグ＆ドロップでパックする処理
+        //-------------------------------------------------------------------------------
+        static int RunBmgPack(string path)
+        {
+            Console.WriteLine("[BMG text] -> BMG pack");
+            return DoBmgPack(new[] { "--bmgpack", path });
+        }
+
+        //-------------------------------------------------------------------------------
+        // BMGファイルをJSONテキストへ展開する処理
+        //-------------------------------------------------------------------------------
+        static int DoBmgExtract(string inputBmg, string? outputText)
+        {
+            inputBmg = NormalizePath(inputBmg);
+            RequireFile(inputBmg);
+            outputText = NormalizeOutputPath(outputText) ?? Path.Combine(
+                Path.GetDirectoryName(inputBmg) ?? ".",
+                Path.GetFileNameWithoutExtension(inputBmg) + ".txt");
+            Console.WriteLine($"BMG extract: {inputBmg} -> {outputText}");
+            BmgConvert.Extract(inputBmg, outputText);
+            Console.WriteLine("Done.");
+            return 0;
+        }
+
+        //-------------------------------------------------------------------------------
+        // JSONテキストをBMGファイルへパックする処理
+        //-------------------------------------------------------------------------------
+        static int DoBmgPack(string[] args)
+        {
+            string inputText = NormalizePath(args[1]);
+            RequireFile(inputText);
+            string? outputBmg = NormalizeOutputPath(OptArg(args, 2));
+            outputBmg ??= Path.Combine(
+                Path.GetDirectoryName(inputText) ?? ".",
+                Path.GetFileNameWithoutExtension(inputText) + ".bmg");
+            string? encoding = GetFlag(args, "--encoding");
+            Console.WriteLine($"BMG pack: {inputText} -> {outputBmg}");
+            BmgConvert.Pack(inputText, outputBmg, encoding);
+            Console.WriteLine("Done.");
+            return 0;
         }
 
         // ── BMD_analysis wrapper ──────────────────────────────────────────────
@@ -495,6 +554,9 @@ namespace RARCToolkit
                 RegisterFileAssociation(exePath, ".dae", "Hocotate Toolkit - DAE to BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".fbx", "Hocotate Toolkit - FBX to BMD", $"\"{exePath}\" \"%1\"");
                 RegisterFileAssociation(exePath, ".obj", "Hocotate Toolkit - OBJ to grid.bin", $"\"{exePath}\" \"%1\"");
+                RegisterFileAssociation(exePath, ".bmg", "Hocotate Toolkit - Extract BMG", $"\"{exePath}\" --bmgextract \"%1\"");
+                RegisterFileAssociation(exePath, ".txt", "Hocotate Toolkit - Pack BMG", $"\"{exePath}\" --bmgpack \"%1\"");
+                RegisterFileAssociation(exePath, ".json", "Hocotate Toolkit - Pack BMG", $"\"{exePath}\" --bmgpack \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitPack", "Hocotate Toolkit - Pack to SZS", $"\"{exePath}\" --szs \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitGcRebuild", "Hocotate Toolkit - Rebuild GC Disc", $"\"{exePath}\" --gcrebuild \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitWiiRebuild", "Hocotate Toolkit - Rebuild Wii Disc", $"\"{exePath}\" --wiirebuild \"%1\"");
@@ -588,7 +650,7 @@ namespace RARCToolkit
 
         static IEnumerable<string> EnumerateHocotateContextMenuKeys()
         {
-            string[] extensions = { ".arc", ".szs", ".iso", ".gcm", ".wbfs", ".bmd", ".bdl", ".dae", ".fbx", ".obj" };
+            string[] extensions = { ".arc", ".szs", ".iso", ".gcm", ".wbfs", ".bmd", ".bdl", ".dae", ".fbx", ".obj", ".bmg", ".txt", ".json" };
             string[] keyNames =
             {
                 "HocotateToolkit",
@@ -721,6 +783,19 @@ namespace RARCToolkit
             new RARCPacker().Pack(root, writer);
         }
 
+        //-------------------------------------------------------------------------------
+        // フォルダをRARCへパックした後にYaz0圧縮してSZSへ保存する処理
+        //-------------------------------------------------------------------------------
+        static void PackFolderToSzs(string folderPath, string outputPath)
+        {
+            VirtualFolder root = BuildVirtualFolder(folderPath, isRoot: true);
+            using var ms = new MemoryStream();
+            using (var writer = new EndianBinaryWriter(ms))
+                new RARCPacker().Pack(root, writer);
+
+            File.WriteAllBytes(outputPath, Yaz0.Compress(ms.ToArray()));
+        }
+
         static VirtualFolder BuildVirtualFolder(string dirPath, bool isRoot)
         {
             string name = Path.GetFileName(
@@ -815,6 +890,8 @@ namespace RARCToolkit
             Console.WriteLine("  --dae2bmd   BMD_analysis v2    RenolY2");
             Console.WriteLine("  --fbx2bmd   BMD_analysis v2    RenolY2");
             Console.WriteLine("  --obj2grid  obj2grid           RenolY2");
+            Console.WriteLine("  --bmgextract cube / pikminBMG  Yoshi2 / riidefi");
+            Console.WriteLine("  --bmgpack    cube / pikminBMG  Yoshi2 / riidefi");
             Console.WriteLine();
             Console.WriteLine("Usage:");
             Console.WriteLine();
@@ -828,6 +905,8 @@ namespace RARCToolkit
             Console.WriteLine("    .dae             -> Convert to BMD");
             Console.WriteLine("    .fbx             -> Convert to BMD");
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
+            Console.WriteLine("    .bmg             -> Extract to JSON text");
+            Console.WriteLine("    .txt / .json     -> Pack to BMG");
             Console.WriteLine();
             Console.WriteLine("  [Command Line]");
             Console.WriteLine("    --pack     <folder>       [output.arc]");
@@ -846,6 +925,8 @@ namespace RARCToolkit
             Console.WriteLine("    --fbx2bmd  <.fbx>         [output.bmd]      skeleton_root 付き FBX を推奨 / FBX with skeleton_root recommended");
             Console.WriteLine("    --bmd2obj  <.bmd>         [output.obj]");
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
+            Console.WriteLine("    --bmgextract <.bmg>       [output.txt]");
+            Console.WriteLine("    --bmgpack <.txt/.json>    [output.bmg] [--encoding shift-jis|latin-1|utf-8|utf-16]");
             Console.WriteLine();
             Console.WriteLine("  [GC Disc Notes]");
             Console.WriteLine("    --gcextract outputs files + sys for GameCube discs.");
@@ -872,6 +953,8 @@ namespace RARCToolkit
             Console.WriteLine("    Folder menu   -> Pack to SZS / Rebuild GC Disc / Rebuild Wii Disc");
             Console.WriteLine("    .iso menu     -> Extract Disc / Convert ISO to WBFS");
             Console.WriteLine("    .fbx menu     -> FBX to BMD");
+            Console.WriteLine("    .bmg menu     -> Extract BMG");
+            Console.WriteLine("    .txt/.json    -> Pack BMG");
             Console.WriteLine();
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
             Console.WriteLine("    resource\\DiscExtract.exe   -> used by --gcextract / --wiiextract");

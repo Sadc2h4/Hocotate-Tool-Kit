@@ -9,7 +9,7 @@
 
 ## Download
 
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.26a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/1.24a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.26a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -25,6 +25,16 @@
   />
 </a>
 <br>
+
+## Update Notes
+
+### v1.27a
+
+- Added BMG message conversion modes: `--bmgextract` and `--bmgpack`.
+- Added Windows right-click menu entries for `.bmg`, `.txt`, and `.json` BMG workflows.
+- Fixed `--szs` packing so output archives are Yaz0-compressed instead of plain RARC data.
+- Fixed RARC end padding and Yaz0 match-distance handling so SZS pack -> extract round trips preserve file contents.
+- Verified the provided test model data: repacked `arc.szs` / `texts.szs` extract back to matching files, and BMD round-trip output no longer shows abnormal size growth.
 
 ## Credits
 
@@ -52,18 +62,20 @@ The following applications and reference authors were consulted for implementati
 | `--dae2bmd` | `BMD_analysis v2` | `RenolY2` |
 | `--fbx2bmd` | `BMD_analysis v2` + `simpleshading preset` | `RenolY2` |
 | `--obj2grid` | `obj2grid` | `RenolY2` |
+| `--bmgextract` | `cube` / `pikminBMG` | `riidefi` / `Yoshi2` |
+| `--bmgpack` | `cube` / `pikminBMG` | `riidefi` / `Yoshi2` |
 
 
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
-**14種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
+**16種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
 
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
-It supports **14 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+It supports **16 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
 Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
@@ -82,6 +94,8 @@ Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bm
 | `--dae2bmd` | Collada形式 `.dae` を `.bmd` に変換 (BMD_analysis使用) / Convert Collada `.dae` back to `.bmd` (via BMD_analysis) |
 | `--fbx2bmd` | `.fbx` を `.bmd` に変換 (`BMD_analysis v2` + `simpleshading.json` 使用) / Convert `.fbx` to `.bmd` (via `BMD_analysis v2` + `simpleshading.json`) |
 | `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 /  Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin`  |
+| `--bmgextract` | `.bmg` メッセージファイルを編集用JSONテキストに展開 / Extract a `.bmg` message file to editable JSON text |
+| `--bmgpack` | JSONテキストを `.bmg` メッセージファイルにパック / Pack JSON text back into a `.bmg` message file |
 
 
 ## Setup
@@ -144,6 +158,8 @@ Output is placed in a subfolder named after the input file, at the same director
 | `.dae` | `--dae2bmd` |
 | `.fbx` | `--fbx2bmd` |
 | `.obj` | `--obj2grid` |
+| `.bmg` | `--bmgextract` |
+| `.txt` / `.json` | `--bmgpack` |
 
 `--register` を実行すると、`.iso` の右クリックメニューに `Convert ISO to WBFS` が追加され、`.fbx` には `FBX to BMD`、フォルダ右クリックには `Pack to SZS` / `Rebuild GC Disc` / `Rebuild Wii Disc` が個別に追加されます。
 
@@ -203,6 +219,15 @@ Hocotate_Toolkit.exe --fbx2bmd "C:\path\to\model.fbx"
 
 :: OBJ コリジョンメッシュを grid.bin に変換 / Convert OBJ collision mesh to grid.bin
 Hocotate_Toolkit.exe --obj2grid "C:\path\to\collision.obj"
+
+:: BMG を JSON テキストに展開 / Extract BMG to JSON text
+Hocotate_Toolkit.exe --bmgextract "C:\path\to\message.bmg"
+
+:: JSON テキストを BMG にパック / Pack JSON text to BMG
+Hocotate_Toolkit.exe --bmgpack "C:\path\to\message.txt"
+
+:: 文字コードを指定して BMG にパック / Pack BMG with an explicit text encoding
+Hocotate_Toolkit.exe --bmgpack "C:\path\to\message.txt" "C:\path\to\message.bmg" --encoding shift-jis
 ```
 
 ### GameCube Round-Trip Notes
@@ -274,12 +299,12 @@ Previously updated to `BMD_analysis v2` (rebuilt SuperBMD).
 
 ### Context Menu / 右クリックメニュー連携
 
-`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.fbx`・`.obj` とフォルダに用途別の右クリック項目が追加されます．
+`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.fbx`・`.obj`・`.bmg`・`.txt`・`.json` とフォルダに用途別の右クリック項目が追加されます．
 管理者権限は不要です（ユーザー単位のレジストリ HKCU に登録されます）．
 
 ----------------------------------------------------------------------------------------------------
 
-Run `Register_ContextMenu.bat` to add purpose-specific Hocotate Toolkit entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.wbfs`, `.bmd`, `.bdl`, `.dae`, `.fbx`, `.obj`) and folders.
+Run `Register_ContextMenu.bat` to add purpose-specific Hocotate Toolkit entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.wbfs`, `.bmd`, `.bdl`, `.dae`, `.fbx`, `.obj`, `.bmg`, `.txt`, `.json`) and folders.
 No administrator rights are required — entries are registered per-user (HKCU).
 
 ```bat
