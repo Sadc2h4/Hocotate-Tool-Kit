@@ -9,6 +9,7 @@
 
 ## Download
 
+Windows<br>
 <a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
@@ -17,7 +18,16 @@
   />
 </a>
 <br>
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.26a">
+Linax<br>
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a_Linax">
+  <img
+    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
+    alt="Download .zip"
+    height="48"
+  />
+</a>
+<br>
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
