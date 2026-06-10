@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <!-- Linux対応のため net48 から net8.0 へ移行 -->
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>BMD_analysisLib</AssemblyName>
+    <RootNamespace>SuperBMD</RootNamespace>
+    <Nullable>disable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AssimpNet 4.1.0: linux-x64 ネイティブ libassimp を同梱しているため Linux で動作する -->
+    <PackageReference Include="AssimpNet" Version="4.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- OpenTK 4系: 数学型(Vector3/Matrix4等)のみ使用するため Mathematics パッケージで十分 -->
+    <PackageReference Include="OpenTK.Mathematics" Version="4.8.2" />
+    <!-- System.Drawing.Common が .NET 8 で Windows 専用になったため ImageSharp で代替 -->
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+  </ItemGroup>
+</Project>

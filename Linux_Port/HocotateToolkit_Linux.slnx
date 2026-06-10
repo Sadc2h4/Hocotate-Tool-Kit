@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/BMD_analysis/">
+    <Project Path="BMD_analysis/BMD_analysis/BMD_analysis.csproj" />
+    <Project Path="BMD_analysis/BMD_analysisLib/BMD_analysisLib.csproj" />
+  </Folder>
+  <Project Path="DiscExtract/DiscExtract.csproj" />
+  <Project Path="DiscRebuild/DiscRebuild.csproj" />
+  <Project Path="HocotateToolkit/HocotateToolkit.csproj" />
+</Solution>
