@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = ["cube"]
+
+[package]
+name = "cubetool"
+description = "Universal GameCube file format tool"
+repository = "https://github.com/mayabyte/cube"
+license = "MIT"
+readme = "README.md"
+version = "0.4.7"
+edition = "2021"
+authors = ["Maya Hayden <mayahayden@protonmail.com>"]
+
+[[bin]]
+name = "cube"
+path = "src/main.rs"
+
+[dependencies]
+cube_rs = { path = "cube", version = "0.4.7" }
+clap = {version="4.5", features=["derive"]}
+image = "0.24"
+serde_json = "1.0"
+log = "0.4.22"
+simple_logger = "5.0.0"

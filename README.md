@@ -9,17 +9,7 @@
 
 ## Download
 
-Windows<br>
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a">
-  <img
-    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
-    alt="Download .zip"
-    height="48"
-  />
-</a>
-<br>
-Linax<br>
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a_Linax">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -37,6 +27,13 @@ Linax<br>
 <br>
 
 ## Update Notes
+
+### v1.28a
+
+- Added BNR banner image conversion modes: `--bnrextract` and `--bnrpack`.
+- Added drag & drop and Windows right-click menu entries for `.bnr` image extraction and `.png` BNR packing.
+- BNR image conversion supports GameCube `BNR1` / `BNR2` RGB5A3 banner images and writes 96x32 RGBA PNG output.
+- PNG to BNR creates a `BNR1` file from a 96x32 PNG image. Text metadata is initialized as blank banner info.
 
 ### v1.27a
 
@@ -74,18 +71,20 @@ The following applications and reference authors were consulted for implementati
 | `--obj2grid` | `obj2grid` | `RenolY2` |
 | `--bmgextract` | `cube` / `pikminBMG` | `riidefi` / `Yoshi2` |
 | `--bmgpack` | `cube` / `pikminBMG` | `riidefi` / `Yoshi2` |
+| `--bnrextract` | `bnrtool` | `xchellx` |
+| `--bnrpack` | `bnrtool` | `xchellx` |
 
 
 ## Features
 
 本アプリケーションはPikmin 2で使用されるNintendo GameCube / Wii向けアーカイブおよび3Dモデルフォーマットを扱う多目的コマンドラインツールです．  
-**16種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
+**18種類の変換モード**をサポートし，**ドラッグ＆ドロップ**・**コマンドライン引数**・**Windowsの右クリックメニュー**から操作できます．
 **BMD/BDLファイル**をドロップすると bmd2dae・bmd2fbx・bmd2obj の3種を一括実行し，それぞれ変換元と同じ階層に名前付きサブフォルダを作成して出力します．
 
 ----------------------------------------------------------------------------------------------------
 
 This application is a multi-purpose command-line tool for working with Nintendo GameCube / Wii archive and 3D model formats used in Pikmin 2.  
-It supports **16 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
+It supports **18 conversion modes** and accepts files via **drag & drop**, **command-line arguments**, or **Windows right-click context menu**.
 Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bmd2fbx, bmd2obj) and places each output in a named subfolder next to the source file.
 
 | Mode | Description |
@@ -106,6 +105,8 @@ Dropping a **BMD/BDL** file runs all three BMD export modes at once (bmd2dae, bm
 | `--obj2grid` | `.obj` コリジョンメッシュをPikmin 2の `grid.bin` + `mapcode.bin` に変換 /  Convert `.obj` collision mesh to Pikmin 2 `grid.bin` + `mapcode.bin`  |
 | `--bmgextract` | `.bmg` メッセージファイルを編集用JSONテキストに展開 / Extract a `.bmg` message file to editable JSON text |
 | `--bmgpack` | JSONテキストを `.bmg` メッセージファイルにパック / Pack JSON text back into a `.bmg` message file |
+| `--bnrextract` | `.bnr` バナー画像を `.png` に展開 / Extract a `.bnr` banner image to `.png` |
+| `--bnrpack` | 96x32 `.png` を `.bnr` バナー画像にパック / Pack a 96x32 `.png` into a `.bnr` banner image |
 
 
 ## Setup
@@ -170,6 +171,8 @@ Output is placed in a subfolder named after the input file, at the same director
 | `.obj` | `--obj2grid` |
 | `.bmg` | `--bmgextract` |
 | `.txt` / `.json` | `--bmgpack` |
+| `.bnr` | `--bnrextract` |
+| `.png` | `--bnrpack` |
 
 `--register` を実行すると、`.iso` の右クリックメニューに `Convert ISO to WBFS` が追加され、`.fbx` には `FBX to BMD`、フォルダ右クリックには `Pack to SZS` / `Rebuild GC Disc` / `Rebuild Wii Disc` が個別に追加されます。
 
@@ -238,7 +241,23 @@ Hocotate_Toolkit.exe --bmgpack "C:\path\to\message.txt"
 
 :: 文字コードを指定して BMG にパック / Pack BMG with an explicit text encoding
 Hocotate_Toolkit.exe --bmgpack "C:\path\to\message.txt" "C:\path\to\message.bmg" --encoding shift-jis
+
+:: BNR バナー画像を PNG に展開 / Extract BNR banner image to PNG
+Hocotate_Toolkit.exe --bnrextract "C:\path\to\opening.bnr"
+
+:: 96x32 PNG を BNR1 にパック / Pack 96x32 PNG to BNR1
+Hocotate_Toolkit.exe --bnrpack "C:\path\to\banner.png"
 ```
+
+### BNR Conversion Notes / BNR 変換について
+
+`--bnrextract` は GameCube / Wii の `BNR1` / `BNR2` に含まれる 96x32 GX RGB5A3 バナー画像を RGBA PNG として書き出します．  
+`--bnrpack` は 96x32 PNG 画像から `BNR1` ファイルを作成します．PNG から作成する場合，タイトル・メーカー・説明文などのテキスト情報は空欄で初期化されます．
+
+----------------------------------------------------------------------------------------------------
+
+`--bnrextract` writes the 96x32 GX RGB5A3 banner image inside GameCube / Wii `BNR1` / `BNR2` files as an RGBA PNG.  
+`--bnrpack` creates a `BNR1` file from a 96x32 PNG image. When creating from PNG, title, maker, and description metadata are initialized as blank text fields.
 
 ### GameCube Round-Trip Notes
 <img width="500" height="350" alt="HokotateToolKit2" src="https://github.com/user-attachments/assets/006d1a4e-ca04-423c-9d29-f8a5cede1394" />
@@ -309,12 +328,12 @@ Previously updated to `BMD_analysis v2` (rebuilt SuperBMD).
 
 ### Context Menu / 右クリックメニュー連携
 
-`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.fbx`・`.obj`・`.bmg`・`.txt`・`.json` とフォルダに用途別の右クリック項目が追加されます．
+`Register_ContextMenu.bat` を実行すると，`.arc`・`.szs`・`.iso`・`.gcm`・`.wbfs`・`.bmd`・`.bdl`・`.dae`・`.fbx`・`.obj`・`.bmg`・`.txt`・`.json`・`.bnr`・`.png` とフォルダに用途別の右クリック項目が追加されます．
 管理者権限は不要です（ユーザー単位のレジストリ HKCU に登録されます）．
 
 ----------------------------------------------------------------------------------------------------
 
-Run `Register_ContextMenu.bat` to add purpose-specific Hocotate Toolkit entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.wbfs`, `.bmd`, `.bdl`, `.dae`, `.fbx`, `.obj`, `.bmg`, `.txt`, `.json`) and folders.
+Run `Register_ContextMenu.bat` to add purpose-specific Hocotate Toolkit entries to the Windows right-click menu for supported file types (`.arc`, `.szs`, `.iso`, `.gcm`, `.wbfs`, `.bmd`, `.bdl`, `.dae`, `.fbx`, `.obj`, `.bmg`, `.txt`, `.json`, `.bnr`, `.png`) and folders.
 No administrator rights are required — entries are registered per-user (HKCU).
 
 ```bat

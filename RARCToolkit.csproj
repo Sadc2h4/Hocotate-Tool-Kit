@@ -16,12 +16,13 @@
     <!-- ── バイナリのプロパティ情報（右クリック→プロパティで表示される内容） ── -->
     <Product>Hocotate Toolkit</Product>
     <Description>Hocotate Toolkit</Description>
-    <Company>C2H4</Company>
+    <Company></Company>
     <Copyright>C2H4</Copyright>
-    <AssemblyVersion>1.27.0.0</AssemblyVersion>
-    <FileVersion>1.27.0.0</FileVersion>
-    <Version>1.27.0</Version>
-    <InformationalVersion>1.27a</InformationalVersion>
+    <AssemblyVersion>1.28.0.0</AssemblyVersion>
+    <FileVersion>1.28.0.0</FileVersion>
+    <Version>1.28.0</Version>
+    <InformationalVersion>1.28a</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
     <!-- ── ビルド環境の情報（パス・ユーザー名）をバイナリに埋め込まない ── -->

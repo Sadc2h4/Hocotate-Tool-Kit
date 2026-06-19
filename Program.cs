@@ -103,6 +103,8 @@ namespace RARCToolkit
                     "obj2grid" => DoObj2Grid(args),
                     "bmgextract" => DoBmgExtract(input, OptArg(args, 2)),
                     "bmgpack" => DoBmgPack(args),
+                    "bnrextract" => DoBnrExtract(input, OptArg(args, 2)),
+                    "bnrpack" => DoBnrPack(input, OptArg(args, 2)),
                     _ => UnknownMode(args[0]),
                 };
             }
@@ -156,6 +158,8 @@ namespace RARCToolkit
                         ".obj"           => RunObj2Grid(path),
                         ".bmg"           => RunBmgExtract(path),
                         ".txt" or ".json"=> RunBmgPack(path),
+                        ".bnr"           => RunBnrExtract(path),
+                        ".png"           => RunBnrPack(path),
                         _                => UnknownDrop(ext),
                     };
                 }
@@ -234,7 +238,7 @@ namespace RARCToolkit
         static int UnknownDrop(string ext)
         {
             Console.Error.WriteLine($"Unsupported file type: {ext}");
-            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj, .bmg, .txt, .json");
+            Console.Error.WriteLine("Supported: folder, .arc, .szs, .iso, .gcm, .wbfs, .bmd, .bdl, .dae, .fbx, .obj, .bmg, .txt, .json, .bnr, .png");
             return 1;
         }
 
@@ -411,6 +415,58 @@ namespace RARCToolkit
             return 0;
         }
 
+        // ── BNR banner image pack / extract ────────────────────────────────
+
+        //-------------------------------------------------------------------------------
+        // BNRファイルをドラッグ＆ドロップでPNG画像へ展開する処理
+        //-------------------------------------------------------------------------------
+        static int RunBnrExtract(string path)
+        {
+            Console.WriteLine("[BNR] -> PNG image extract");
+            return DoBnrExtract(path, null);
+        }
+
+        //-------------------------------------------------------------------------------
+        // PNG画像をドラッグ＆ドロップでBNRファイルへパックする処理
+        //-------------------------------------------------------------------------------
+        static int RunBnrPack(string path)
+        {
+            Console.WriteLine("[PNG] -> BNR banner pack");
+            return DoBnrPack(path, null);
+        }
+
+        //-------------------------------------------------------------------------------
+        // BNRファイルのバナー画像をPNGへ展開する処理
+        //-------------------------------------------------------------------------------
+        static int DoBnrExtract(string inputBnr, string? outputPng)
+        {
+            inputBnr = NormalizePath(inputBnr);
+            RequireFile(inputBnr);
+            outputPng = NormalizeOutputPath(outputPng) ?? Path.Combine(
+                Path.GetDirectoryName(inputBnr) ?? ".",
+                Path.GetFileNameWithoutExtension(inputBnr) + ".png");
+            Console.WriteLine($"BNR extract: {inputBnr} -> {outputPng}");
+            BnrConvert.ExtractImage(inputBnr, outputPng);
+            Console.WriteLine("Done.");
+            return 0;
+        }
+
+        //-------------------------------------------------------------------------------
+        // PNG画像をBNR1ファイルへパックする処理
+        //-------------------------------------------------------------------------------
+        static int DoBnrPack(string inputPng, string? outputBnr)
+        {
+            inputPng = NormalizePath(inputPng);
+            RequireFile(inputPng);
+            outputBnr = NormalizeOutputPath(outputBnr) ?? Path.Combine(
+                Path.GetDirectoryName(inputPng) ?? ".",
+                Path.GetFileNameWithoutExtension(inputPng) + ".bnr");
+            Console.WriteLine($"BNR pack: {inputPng} -> {outputBnr}");
+            BnrConvert.PackImage(inputPng, outputBnr);
+            Console.WriteLine("Done.");
+            return 0;
+        }
+
         // ── BMD_analysis wrapper ──────────────────────────────────────────────
 
         static int DoBmd2Dae(string inputBmd, string? outputDae)
@@ -557,6 +613,8 @@ namespace RARCToolkit
                 RegisterFileAssociation(exePath, ".bmg", "Hocotate Toolkit - Extract BMG", $"\"{exePath}\" --bmgextract \"%1\"");
                 RegisterFileAssociation(exePath, ".txt", "Hocotate Toolkit - Pack BMG", $"\"{exePath}\" --bmgpack \"%1\"");
                 RegisterFileAssociation(exePath, ".json", "Hocotate Toolkit - Pack BMG", $"\"{exePath}\" --bmgpack \"%1\"");
+                RegisterFileAssociation(exePath, ".bnr", "Hocotate Toolkit - Extract BNR Image", $"\"{exePath}\" --bnrextract \"%1\"");
+                RegisterFileAssociation(exePath, ".png", "Hocotate Toolkit - Pack BNR Image", $"\"{exePath}\" --bnrpack \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitPack", "Hocotate Toolkit - Pack to SZS", $"\"{exePath}\" --szs \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitGcRebuild", "Hocotate Toolkit - Rebuild GC Disc", $"\"{exePath}\" --gcrebuild \"%1\"");
                 RegisterDirectoryAssociation(exePath, "HocotateToolkitWiiRebuild", "Hocotate Toolkit - Rebuild Wii Disc", $"\"{exePath}\" --wiirebuild \"%1\"");
@@ -650,7 +708,7 @@ namespace RARCToolkit
 
         static IEnumerable<string> EnumerateHocotateContextMenuKeys()
         {
-            string[] extensions = { ".arc", ".szs", ".iso", ".gcm", ".wbfs", ".bmd", ".bdl", ".dae", ".fbx", ".obj", ".bmg", ".txt", ".json" };
+            string[] extensions = { ".arc", ".szs", ".iso", ".gcm", ".wbfs", ".bmd", ".bdl", ".dae", ".fbx", ".obj", ".bmg", ".txt", ".json", ".bnr", ".png" };
             string[] keyNames =
             {
                 "HocotateToolkit",
@@ -892,6 +950,8 @@ namespace RARCToolkit
             Console.WriteLine("  --obj2grid  obj2grid           RenolY2");
             Console.WriteLine("  --bmgextract cube / pikminBMG  Yoshi2 / riidefi");
             Console.WriteLine("  --bmgpack    cube / pikminBMG  Yoshi2 / riidefi");
+            Console.WriteLine("  --bnrextract bnrtool           xchellx");
+            Console.WriteLine("  --bnrpack    bnrtool           xchellx");
             Console.WriteLine();
             Console.WriteLine("Usage:");
             Console.WriteLine();
@@ -907,6 +967,8 @@ namespace RARCToolkit
             Console.WriteLine("    .obj             -> Generate grid.bin + mapcode.bin");
             Console.WriteLine("    .bmg             -> Extract to JSON text");
             Console.WriteLine("    .txt / .json     -> Pack to BMG");
+            Console.WriteLine("    .bnr             -> Extract banner image to PNG");
+            Console.WriteLine("    .png             -> Pack 96x32 PNG to BNR1");
             Console.WriteLine();
             Console.WriteLine("  [Command Line]");
             Console.WriteLine("    --pack     <folder>       [output.arc]");
@@ -927,6 +989,8 @@ namespace RARCToolkit
             Console.WriteLine("    --obj2grid <.obj>         [grid.bin] [mapcode.bin] [--cell_size 100] [--flipyz]");
             Console.WriteLine("    --bmgextract <.bmg>       [output.txt]");
             Console.WriteLine("    --bmgpack <.txt/.json>    [output.bmg] [--encoding shift-jis|latin-1|utf-8|utf-16]");
+            Console.WriteLine("    --bnrextract <.bnr>       [output.png]");
+            Console.WriteLine("    --bnrpack <.png>          [output.bnr]      input PNG must be 96x32");
             Console.WriteLine();
             Console.WriteLine("  [GC Disc Notes]");
             Console.WriteLine("    --gcextract outputs files + sys for GameCube discs.");
@@ -955,6 +1019,8 @@ namespace RARCToolkit
             Console.WriteLine("    .fbx menu     -> FBX to BMD");
             Console.WriteLine("    .bmg menu     -> Extract BMG");
             Console.WriteLine("    .txt/.json    -> Pack BMG");
+            Console.WriteLine("    .bnr menu     -> Extract BNR image");
+            Console.WriteLine("    .png menu     -> Pack BNR image");
             Console.WriteLine();
             Console.WriteLine("  External tools (place in the resource\\ folder next to this exe):");
             Console.WriteLine("    resource\\DiscExtract.exe   -> used by --gcextract / --wiiextract");

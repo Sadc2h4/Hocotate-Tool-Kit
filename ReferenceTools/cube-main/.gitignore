@@ -1,0 +1,12 @@
+/target
+*.szs
+*.bti
+*.bti.png
+*.rarc
+*.arc
+*.iso
+*.bmg
+*.bmc
+*.btk
+*.blo
+*.bmg.json
