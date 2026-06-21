@@ -20,12 +20,15 @@
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
     <Product>Hocotate Toolkit</Product>
     <Description>Hocotate Toolkit</Description>
-    <Company>C2H4</Company>
+    <Authors>C2H4</Authors>
+    <Company></Company>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <Copyright>C2H4</Copyright>
     <AssemblyVersion>1.27.0.0</AssemblyVersion>
     <FileVersion>1.27.0.0</FileVersion>
     <Version>1.27.0</Version>
     <InformationalVersion>1.27a</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 </Project>

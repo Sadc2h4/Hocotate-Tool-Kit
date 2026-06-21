@@ -105,7 +105,10 @@ namespace RARCToolkit.Collision
                         var (v2, n2) = ParseFaceVertex(parts[2]);
                         var (v3, n3) = ParseFaceVertex(parts[3]);
                         // OBJ は 1 始まりインデックス → 0 始まりに変換
-                        faces.Add(new ObjFace(v1 - 1, v2 - 1, v3 - 1, n1, n2, n3, floorType));
+                        if (flipYZ)
+                            faces.Add(new ObjFace(v1 - 1, v3 - 1, v2 - 1, n1, n3, n2, floorType));
+                        else
+                            faces.Add(new ObjFace(v1 - 1, v2 - 1, v3 - 1, n1, n2, n3, floorType));
                         break;
                     }
                     case "usemtl":
@@ -176,7 +179,7 @@ namespace RARCToolkit.Collision
                 FaceWriteData fd;
                 if (degenerate)
                 {
-                    fd = new FaceWriteData(face.V1, face.V3, face.V2,
+                    fd = new FaceWriteData(face.V1, face.V2, face.V3,
                         Vec3.Zero, 0f, Vec3.Zero, 0f, Vec3.Zero, 0f, Vec3.Zero, 0f);
                 }
                 else
@@ -195,8 +198,7 @@ namespace RARCToolkit.Collision
                     float c = tan2.X * p2.X + tan2.Y * p2.Y + tan2.Z * p2.Z;
                     float d = tan3.X * p3.X + tan3.Y * p3.Y + tan3.Z * p3.Z;
 
-                    // 書き込み順は v1, v3, v2 （Python 原本どおり v3/v2 を入れ替え）
-                    fd = new FaceWriteData(face.V1, face.V3, face.V2,
+                    fd = new FaceWriteData(face.V1, face.V2, face.V3,
                         norm, a, tan1, b, tan2, c, tan3, d);
                 }
 

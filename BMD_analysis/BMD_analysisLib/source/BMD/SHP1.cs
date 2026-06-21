@@ -326,7 +326,7 @@ namespace SuperBMDLib.BMD
 
                         for (int triIndex = 0; triIndex < triVertices.Count; triIndex += 3)
                         {
-                            Face newFace = new Face(new int[] { vertexID + 2, vertexID + 1, vertexID });
+                            Face newFace = new Face(new int[] { vertexID, vertexID + 1, vertexID + 2 });
                             mesh.Faces.Add(newFace);
 
                             for (int triVertIndex = 0; triVertIndex < 3; triVertIndex++)

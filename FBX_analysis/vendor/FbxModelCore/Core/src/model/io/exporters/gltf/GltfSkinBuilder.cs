@@ -32,8 +32,10 @@ public sealed class GltfSkinBuilder {
     boneTransformManager.CalculateStaticMatricesForManualProjection(model);
 
     var boneToIndex
-        = model.Skeleton.Skip(1)
-               .ToIndexByValueIndexableDictionary();
+        = model.Skeleton.Bones
+               .Where(bone => bone != model.Skeleton.Root)
+               .ToIndexableDictionary(bone => bone,
+                                      bone => bone.Index - 1);
 
     var nullMaterialBuilder =
         new MaterialBuilder("null").WithDoubleSide(false)

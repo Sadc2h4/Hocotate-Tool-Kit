@@ -21,11 +21,14 @@
     <EnableSourceLink>false</EnableSourceLink>
     <!-- 製品情報 -->
     <Product>FBX_analysis</Product>
-    <Company>C2H4</Company>
+    <Authors>C2H4</Authors>
+    <Company></Company>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <Copyright>C2H4</Copyright>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
     <Version>2.0.0</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- 同名ネイティブ DLL 競合を無視 -->
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>

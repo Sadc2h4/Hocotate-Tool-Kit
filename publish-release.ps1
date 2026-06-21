@@ -39,11 +39,11 @@ $projects = @(
 )
 
 # BMD_analysis は net48 のため dotnet build で個別ビルド（publish は別処理）
-$bmdProjectPath = "${projectRoot}\BMD_analysis\BMD_analysis\BMD_analysis.csproj"
+$bmdProjectPath = Join-Path $projectRoot "BMD_analysis\BMD_analysis\BMD_analysis.csproj"
 $bmdAnalysisPublishDir = Join-Path $outputRootPath "_publish\BMD_analysis"
 
 # FBX_analysis は net10.0 のため dotnet publish で個別ビルド
-$fbxProjectPath = "${projectRoot}\FBX_analysis\FbxAnalysis.csproj"
+$fbxProjectPath = Join-Path $projectRoot "FBX_analysis\FbxAnalysis.csproj"
 $fbxAnalysisPublishDir = Join-Path $outputRootPath "_publish\FBX_analysis"
 
 # ── 出力フォルダ初期化 ─────────────────────────────────────────────────────────
@@ -156,7 +156,7 @@ Copy-Item (Join-Path $projects[2].PublishDir "Hocotate_Toolkit.exe") $outputRoot
 Copy-Item (Join-Path $projectRoot "README.md") $outputRootPath -Force
 Copy-Item (Join-Path $projectRoot "Register_ContextMenu.bat") $outputRootPath -Force
 Copy-Item (Join-Path $projectRoot "Unregister_ContextMenu.bat") $outputRootPath -Force
-Copy-Item (Join-Path $projectRoot "アップデートノート.txt") (Join-Path $outputRootPath "アップデート内容.txt") -Force
+Copy-Item (Join-Path $projectRoot "アップデート内容.txt") (Join-Path $outputRootPath "アップデート内容.txt") -Force
 
 # ── 中間ファイル削除・ZIP 作成 ────────────────────────────────────────────────
 

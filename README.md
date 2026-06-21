@@ -9,8 +9,7 @@
 
 ## Download
 
-Windows  
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28b">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -18,7 +17,7 @@ Windows
   />
 </a>
 <br>
-<a href="https://www.dropbox.com/scl/fi/hur7vm3fv5rvikc3nfiu4/Hocotate_Toolkit_v1.28a.zip?rlkey=w0cwdl3ixi6lp3eetbgsukxhp&st=5cqufgyc&dl=0">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -26,17 +25,16 @@ Windows
   />
 </a>
 <br>
-Linax  
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.27a_Linax">
-  <img
-    src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
-    alt="Download .zip"
-    height="48"
-  />
-</a>
-<br>
 
 ## Update Notes
+
+### v1.28b
+
+- Fixed BMD to FBX skin joint indexing so Blender vertex groups and weights stay assigned to the correct bones.
+- Updated the bundled `FBX_analysis.exe` with the corrected BMD to FBX exporter.
+- Fixed BMD to OBJ/DAE face winding so exported mesh faces are no longer reversed.
+- Fixed OBJ to `grid.bin` face winding while preserving the `--flipyz` handedness correction.
+- Verified the provided Chappy test model and Pikmin test BMD data against the corrected BMD to FBX output.
 
 ### v1.28a
 
