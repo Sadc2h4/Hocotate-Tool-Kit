@@ -20,10 +20,10 @@
     <Company></Company>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <Copyright>C2H4</Copyright>
-    <AssemblyVersion>1.28.1.0</AssemblyVersion>
-    <FileVersion>1.28.1.0</FileVersion>
-    <Version>1.28.1</Version>
-    <InformationalVersion>1.28b</InformationalVersion>
+    <AssemblyVersion>1.30.0.0</AssemblyVersion>
+    <FileVersion>1.30.0.0</FileVersion>
+    <Version>1.30.0</Version>
+    <InformationalVersion>1.30a</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 

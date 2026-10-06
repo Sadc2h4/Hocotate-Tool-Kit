@@ -9,7 +9,7 @@
 
 ## Download
 
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28b">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.30a">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_1.png"
     alt="Download .zip"
@@ -17,7 +17,7 @@
   />
 </a>
 <br>
-<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28a">
+<a href="https://github.com/Sadc2h4/Hocotate-Tool-Kit/releases/tag/v1.28b">
   <img
     src="https://raw.githubusercontent.com/Sadc2h4/brand-assets/main/button/Download_Button_4.png"
     alt="Download .zip"
@@ -27,6 +27,14 @@
 <br>
 
 ## Update Notes
+
+### v1.30a
+
+- Fixed BMD to DAE/OBJ face winding: faces are now written counter-clockwise, so BMD -> DAE -> BMD round trips keep the original front faces and Blender shows the correct side.
+- Fixed vertex merging in BMD to DAE/OBJ export so vertices weighted to different bones are no longer merged (symmetric parts such as eyes and legs no longer swap bones).
+- Replaced Assimp's `JoinIdenticalVertices` on DAE/FBX import with a bone-aware vertex merge.
+- Fixed BMD to FBX so the textures referenced by the FBX are exported next to it; FBX -> BMD no longer stops with "Texture wasn't found".
+- Verified with the Dwarf Red Bulborb model: BMD -> DAE -> BMD now matches the original (face winding, 321 vertices, bone assignment), and BMD -> FBX -> BMD converts without manual steps.
 
 ### v1.28b
 
@@ -42,14 +50,6 @@
 - Added drag & drop and Windows right-click menu entries for `.bnr` image extraction and `.png` BNR packing.
 - BNR image conversion supports GameCube `BNR1` / `BNR2` RGB5A3 banner images and writes 96x32 RGBA PNG output.
 - PNG to BNR creates a `BNR1` file from a 96x32 PNG image. Text metadata is initialized as blank banner info.
-
-### v1.27a
-
-- Added BMG message conversion modes: `--bmgextract` and `--bmgpack`.
-- Added Windows right-click menu entries for `.bmg`, `.txt`, and `.json` BMG workflows.
-- Fixed `--szs` packing so output archives are Yaz0-compressed instead of plain RARC data.
-- Fixed RARC end padding and Yaz0 match-distance handling so SZS pack -> extract round trips preserve file contents.
-- Verified the provided test model data: repacked `arc.szs` / `texts.szs` extract back to matching files, and BMD round-trip output no longer shows abnormal size growth.
 
 ## Credits
 
