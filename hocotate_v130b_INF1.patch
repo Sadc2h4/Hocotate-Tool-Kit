@@ -1,0 +1,14 @@
+diff --git a/BMD_analysis/BMD_analysisLib/source/BMD/INF1.cs b/BMD_analysis/BMD_analysisLib/source/BMD/INF1.cs
+index ef59b05..feb56c5 100644
+--- a/BMD_analysis/BMD_analysisLib/source/BMD/INF1.cs
++++ b/BMD_analysis/BMD_analysisLib/source/BMD/INF1.cs
+@@ -210,6 +210,9 @@ namespace SuperBMDLib.BMD
+             SceneNode lastNode = Root;
+ 
+             Node curAssRoot = new Node(flatSkeleton[0].Name, root);
++            // 一番上の骨にも行列を入れる（入れないと単位行列になり，回転・移動を持つモデルで基準の姿勢がずれ，
++            // 重み付きの頂点が往復変換で崩れる．2 番目以降の骨と同じ扱いにする）．
++            curAssRoot.Transform = flatSkeleton[0].TransformationMatrix.ToMatrix4x4();
+             Node lastAssNode = curAssRoot;
+             root.Children.Add(curAssRoot);
+ 
