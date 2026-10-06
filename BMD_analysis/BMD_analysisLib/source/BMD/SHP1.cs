@@ -326,7 +326,9 @@ namespace SuperBMDLib.BMD
 
                         for (int triIndex = 0; triIndex < triVertices.Count; triIndex += 3)
                         {
-                            Face newFace = new Face(new int[] { vertexID, vertexID + 1, vertexID + 2 });
+                            // GX（BMD）は時計回りが表，dae・obj は反時計回りが表なので，書き出す時に向きを逆にする．
+                            // 読み込み（Shape.MakeTriIndexList）は常に逆にしているため，これで往復しても表裏が変わらない．
+                            Face newFace = new Face(new int[] { vertexID, vertexID + 2, vertexID + 1 });
                             mesh.Faces.Add(newFace);
 
                             for (int triVertIndex = 0; triVertIndex < 3; triVertIndex++)

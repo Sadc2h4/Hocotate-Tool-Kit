@@ -158,6 +158,16 @@ internal static class Program {
         return 1;
       }
 
+      //-------------------------------------------------------------------------------
+      // FBX が参照するテクスチャの画像を同じフォルダに書き出す
+      // GLB にはテクスチャが埋め込まれるが，FBX はファイル名で参照するだけなので，
+      // 画像がないと fbx2bmd でテクスチャが見つからず止まる．
+      //-------------------------------------------------------------------------------
+      var textureDirectory = new FinDirectory(outputDir);
+      foreach (var texture in model.MaterialManager.Textures.DistinctBy(t => t.Name)) {
+        texture.SaveInDirectory(textureDirectory); // ValidFileName（FBX の参照名）で保存する
+      }
+
       Console.WriteLine("Done.");
       return 0;
     } catch (Exception ex) {

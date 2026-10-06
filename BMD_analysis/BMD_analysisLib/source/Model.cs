@@ -56,17 +56,20 @@ namespace SuperBMDLib
                 // AssImp adds dummy nodes for pivots from FBX, so we'll force them off
                 cont.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
 
-                Assimp.PostProcessSteps postprocess = Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices;
-                
-                if (args.tristrip_mode == "none") {
-                    // By not joining identical vertices, the Tri Strip algorithm we use cannot make tristrips, 
-                    // effectively disabling tri stripping
-                    postprocess = Assimp.PostProcessSteps.Triangulate; 
-                }
+                // Assimp の JoinIdenticalVertices は骨の重みを比べずに頂点をまとめるため，左右対称の部品（目や脚）で
+                // 別の骨の頂点が 1 つにまとめられてしまう．三角形化だけを Assimp に任せ，頂点は骨も比べる自前の処理でまとめる．
+                Assimp.PostProcessSteps postprocess = Assimp.PostProcessSteps.Triangulate;
 
-                
-                
                 Assimp.Scene aiScene = cont.ImportFile(args.input_path, postprocess);
+
+                if (args.tristrip_mode != "none") {
+                    // By not joining identical vertices, the Tri Strip algorithm we use cannot make tristrips,
+                    // effectively disabling tri stripping
+                    foreach (Mesh importedMesh in aiScene.Meshes)
+                    {
+                        RemoveDuplicateVertices(importedMesh); // 位置・法線・UV・色・骨の重みがすべて同じ頂点だけをまとめる
+                    }
+                }
 
                 if (Path.GetExtension(args.input_path).ToLower() == ".dae")
                 {
@@ -833,7 +836,44 @@ namespace SuperBMDLib
             return matname;
         }
 
-        private void RemoveDuplicateVertices(Mesh mesh)
+        //-------------------------------------------------------------------------------
+        // 頂点ごとに，付いている骨と重みを並べた文字列を作る処理
+        // （骨と重みが同じ頂点どうしだけを同じ頂点として扱うために使う）
+        //-------------------------------------------------------------------------------
+        private static string[] MakeBoneWeightKeys(Mesh mesh)
+        {
+            List<string>[] parts = new List<string>[mesh.Vertices.Count];
+            foreach (Bone bone in mesh.Bones)
+            {
+                foreach (VertexWeight weight in bone.VertexWeights)
+                {
+                    if (weight.VertexID < 0 || weight.VertexID >= parts.Length)
+                        continue;
+                    if (parts[weight.VertexID] == null)
+                        parts[weight.VertexID] = new List<string>();
+                    parts[weight.VertexID].Add(bone.Name + "=" + weight.Weight.ToString("R")); // 骨の名前と重み
+                }
+            }
+
+            string[] keys = new string[mesh.Vertices.Count];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (parts[i] == null)
+                {
+                    keys[i] = "";
+                    continue;
+                }
+                parts[i].Sort(StringComparer.Ordinal); // 骨の並び順に左右されないよう並べ替える
+                keys[i] = string.Join("|", parts[i]);
+            }
+            return keys;
+        }
+
+        //-------------------------------------------------------------------------------
+        // 位置・法線・UV・色・骨の重みがすべて同じ頂点を 1 つにまとめる処理
+        // （骨を比べないと，骨から見た位置が同じ左右の目などが 1 つにまとめられ，別の骨に付いてしまう）
+        //-------------------------------------------------------------------------------
+        private static void RemoveDuplicateVertices(Mesh mesh)
         {
             // Calculate which vertices are duplicates (based on their position, texture coordinates, and normals).
             List<
@@ -841,6 +881,9 @@ namespace SuperBMDLib
                 > uniqueVertInfos = new List<
                                             Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>>
                                             >();
+            List<string> uniqueBoneKeys = new List<string>();  // まとめた後の頂点ごとの骨と重み
+            string[] boneKeys = MakeBoneWeightKeys(mesh);      // 元の頂点ごとの骨と重み
+            Dictionary<Vector3D, List<int>> uniqueByPosition = new Dictionary<Vector3D, List<int>>(); // 位置ごとの候補（総当たりを避ける）
 
             int[] replaceVertexIDs = new int[mesh.Vertices.Count];
             bool[] vertexIsUnique = new bool[mesh.Vertices.Count];
@@ -874,9 +917,17 @@ namespace SuperBMDLib
 
                 // Determine if this vertex is a duplicate of a previously encountered vertex or not and if it is keep track of the new index
                 var duplicateVertexIndex = -1;
-                for (var i = 0; i < uniqueVertInfos.Count; i++)
+                List<int> candidates;
+                if (!uniqueByPosition.TryGetValue(vertInfo.Item1, out candidates))
+                {
+                    candidates = new List<int>();
+                    uniqueByPosition.Add(vertInfo.Item1, candidates);
+                }
+                foreach (int i in candidates)
                 {
                     Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>> otherVertInfo = uniqueVertInfos[i];
+                    if (uniqueBoneKeys[i] != boneKeys[origVertexID])
+                        continue; // 付いている骨か重みが違うので別の頂点
                     if (CheckVertInfosAreDuplicates(
                         vertInfo.Item1, vertInfo.Item2, vertInfo.Item3, vertInfo.Item4, 
                         otherVertInfo.Item1, otherVertInfo.Item2, otherVertInfo.Item3, otherVertInfo.Item4))
@@ -890,7 +941,9 @@ namespace SuperBMDLib
                 {
                     vertexIsUnique[origVertexID] = true;
                     uniqueVertInfos.Add(vertInfo);
+                    uniqueBoneKeys.Add(boneKeys[origVertexID]);
                     replaceVertexIDs[origVertexID] = uniqueVertInfos.Count - 1;
+                    candidates.Add(uniqueVertInfos.Count - 1);
                 }
                 else
                 {
@@ -962,7 +1015,7 @@ namespace SuperBMDLib
             }
         }
 
-        private bool CheckVertInfosAreDuplicates(Vector3D vert1, Vector3D? norm1, List<Vector3D> vert1TexCoords, List<Color4D> vert1Colors,
+        private static bool CheckVertInfosAreDuplicates(Vector3D vert1, Vector3D? norm1, List<Vector3D> vert1TexCoords, List<Color4D> vert1Colors,
                                                 Vector3D vert2, Vector3D? norm2, List<Vector3D> vert2TexCoords, List<Color4D> vert2Colors)
         {
             if (vert1 != vert2)
